@@ -1,6 +1,13 @@
 {
   "miniprogramRoot": "miniprogram/",
   "cloudfunctionRoot": "cloudfunctions/",
+  "env": {
+    "default": {
+      "appId": "wx2888e2dc358f4072",
+      "envId": "cloud1-d0gbgetcn91021db4",
+      "projectId": "cloud1"
+    }
+  },
   "setting": {
     "urlCheck": true,
     "es6": true,
