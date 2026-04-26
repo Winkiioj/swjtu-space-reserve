@@ -1,0 +1,15 @@
+{
+    "name": "cancelApplication",
+    "version": "1.0.0",
+    "description": "取消教室申请云函数",
+    "main": "index.js",
+    "scripts": {
+        "test": "node index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "wx-server-sdk": "latest"
+    }
+}

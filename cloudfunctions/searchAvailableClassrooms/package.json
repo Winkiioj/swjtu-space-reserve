@@ -1,0 +1,15 @@
+{
+    "name": "searchAvailableClassrooms",
+    "version": "1.0.0",
+    "description": "查询可用教室云函数",
+    "main": "index.js",
+    "scripts": {
+        "test": "node index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "wx-server-sdk": "latest"
+    }
+}
