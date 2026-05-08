@@ -1,0 +1,151 @@
+/* miniprogram/pages/seat/seat.wxss */
+.container {
+  padding: 30rpx;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.section {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.05);
+}
+
+.section-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 20rpx;
+  color: #333;
+}
+
+.radio-group {
+  display: flex;
+  gap: 40rpx;
+}
+.radio-label {
+  display: flex;
+  align-items: center;
+}
+.radio-label text {
+  margin-left: 10rpx;
+  font-size: 30rpx;
+}
+
+.lecture-group {
+  margin-bottom: 30rpx;
+}
+.group-title {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #07c160;
+  margin-bottom: 15rpx;
+  border-left: 6rpx solid #07c160;
+  padding-left: 15rpx;
+}
+.lecture-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: 20rpx;
+}
+.lecture-item {
+  width: 30%;
+  margin: 10rpx 0;
+  display: flex;
+  align-items: center;
+}
+.lecture-item text {
+  margin-left: 10rpx;
+  font-size: 28rpx;
+  color: #444;
+}
+
+button[type="primary"] {
+  background-color: #07c160;
+  border-radius: 50rpx;
+  margin-bottom: 30rpx;
+}
+
+.filter-section {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+}
+.filter-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  margin-bottom: 20rpx;
+}
+.filter-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+  flex-wrap: wrap;
+}
+.filter-label {
+  width: 100rpx;
+  font-size: 28rpx;
+  line-height: 60rpx;
+  color: #666;
+}
+.filter-options {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+}
+.filter-tag {
+  background-color: #f0f0f0;
+  border-radius: 40rpx;
+  padding: 10rpx 30rpx;
+  margin-right: 20rpx;
+  margin-bottom: 15rpx;
+  font-size: 28rpx;
+  color: #333;
+}
+.filter-tag.active {
+  background-color: #07c160;
+  color: #fff;
+}
+.confirm-btn {
+  background-color: #1989fa;
+  color: #fff;
+  border-radius: 50rpx;
+  margin-top: 20rpx;
+  font-size: 30rpx;
+}
+
+.seat-list {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 20rpx;
+}
+.seat-card {
+  background: #fafafa;
+  border-radius: 16rpx;
+  padding: 25rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1rpx 4rpx rgba(0,0,0,0.1);
+}
+.seat-id {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #333;
+}
+.seat-info {
+  font-size: 28rpx;
+  color: #999;
+}
+.empty-tip {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+  font-size: 30rpx;
+  background-color: #fff;
+  border-radius: 20rpx;
+}
