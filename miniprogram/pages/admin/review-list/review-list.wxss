@@ -1,0 +1,10 @@
+@import '../../../styles/admin-theme.wxss';
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 30rpx;
+  background: #fafbfc;
+  border-bottom: 2rpx solid var(--adm-border);
+}

@@ -1,0 +1,9 @@
+{
+  "name": "cleanupClassrooms",
+  "version": "1.0.0",
+  "description": "清理旧格式教室数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

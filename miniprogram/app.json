@@ -1,13 +1,18 @@
 {
   "pages": [
+    "pages/manager-login/manager-login",
     "pages/index/index",
+    "pages/admin/dashboard/dashboard",
+    "pages/admin/review-list/review-list",
+    "pages/admin/review-detail/review-detail",
+    "pages/admin/init-data/init-data",
     "pages/example/index"
   ],
   "window": {
     "backgroundColor": "#F6F6F6",
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#F6F6F6",
-    "navigationBarTitleText": "云开发 QuickStart",
+    "navigationBarTitleText": "教室预约系统",
     "navigationBarTextStyle": "black"
   },
   "sitemapLocation": "sitemap.json",

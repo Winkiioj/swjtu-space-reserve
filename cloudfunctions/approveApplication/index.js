@@ -1,192 +1,126 @@
-/**
- * approveApplication - 批准申请
- * 
- * 管理员批准教室租赁申请
- * - 验证申请存在且处于待审核状态
- * - 再次验证教室讲次是否仍可用（防止并发修改）
- * - 原子性更新：申请状态 + 教室矩阵
- */
-
 const cloud = require('wx-server-sdk')
-
 cloud.init()
 const db = cloud.database()
-const _ = db.command
+const { success, fail } = require('./response')
+const { requireAdmin } = require('./auth')
+const { logAudit } = require('./audit')
+const { deepCopyMatrix } = require('./constants')
 
 /**
  * 获取申请详情
  */
 async function getApplicationInfo(applicationID) {
-    try {
-        const result = await db.collection('Applications')
-            .doc(applicationID)
-            .get()
-
-        return result.data.length > 0 ? result.data[0] : null
-    } catch (err) {
-        console.error('获取申请详情失败:', err)
-        return null
-    }
+  const result = await db.collection('Applications').doc(applicationID).get()
+  return result.data || null
 }
 
 /**
  * 获取教室信息
  */
 async function getClassroomInfo(classroomID) {
-    try {
-        const result = await db.collection('Classrooms')
-            .doc(classroomID)
-            .get()
-
-        return result.data.length > 0 ? result.data[0] : null
-    } catch (err) {
-        console.error('获取教室信息失败:', err)
-        return null
-    }
+  const result = await db.collection('Classrooms').doc(classroomID).get()
+  return result.data || null
 }
 
 /**
- * 检查讲次是否可用（最新状态）
+ * 检查指定讲次是否全部空闲
  */
-function checkLecturesStillAvailable(matrix, dayOfWeek, lectures) {
-    for (let lecture of lectures) {
-        // 只有状态为0才表示可用
-        if (matrix[dayOfWeek][lecture] !== 0) {
-            return false
-        }
-    }
-    return true
+function checkLecturesAvailable(matrix, dayOfWeek, lectures) {
+  return lectures.every(lec => matrix[dayOfWeek][lec] === 0)
 }
 
 /**
- * 深拷贝矩阵
+ * 更新矩阵：将指定讲次标记为占用(2)
  */
-function deepCopyMatrix(matrix) {
-    return JSON.parse(JSON.stringify(matrix))
+function occupyLectures(matrix, dayOfWeek, lectures) {
+  const newMatrix = deepCopyMatrix(matrix)
+  for (let lec of lectures) {
+    newMatrix[dayOfWeek][lec] = 2
+  }
+  return newMatrix
 }
 
-/**
- * 更新矩阵（将指定讲次设置为2=已占用）
- */
-function updateMatrixToOccupied(matrix, dayOfWeek, lectures) {
-    const newMatrix = deepCopyMatrix(matrix)
-    for (let lecture of lectures) {
-        newMatrix[dayOfWeek][lecture] = 2  // 2 = 已占用
+exports.main = async (event) => {
+  try {
+    const { applicationID, approverID, approvedClassroomId } = event
+    if (!applicationID || !approverID) return fail(400, '参数缺失')
+
+    // ===== 管理员身份校验 =====
+    await requireAdmin(db, approverID)
+
+    // ===== 获取申请 =====
+    const application = await getApplicationInfo(applicationID)
+    if (!application) return fail(404, '申请不存在')
+    if (application.rentalStatus !== 0) {
+      return fail(400, `申请状态不合法（当前状态: ${application.rentalStatus}），只能批准待审核的申请`)
     }
-    return newMatrix
-}
 
-exports.main = async (event, context) => {
-    try {
-        const { applicationID, approverID } = event
+    // ===== 确定目标教室 =====
+    const targetClassroomId = approvedClassroomId || application.classroomApplied
+    const isAlternative = targetClassroomId !== application.classroomApplied
 
-        // ===== 参数校验 =====
-        if (!applicationID || !approverID) {
-            return {
-                code: 400,
-                message: '参数缺失',
-                data: null
-            }
-        }
+    const classroom = await getClassroomInfo(targetClassroomId)
+    if (!classroom) return fail(404, '教室不存在')
 
-        // ===== 验证审批人是否为管理员 =====
-        // 这里可以根据实际需要添加权限检查
-        // 如果集成了权限管理系统，需要在这里验证approverID是否为admin
+    // ===== 检查讲次可用性（防止并发冲突） =====
+    const matrixFieldName = application.rentWeek === 'this'
+      ? 'thisWeekStatusMatrix'
+      : 'nextWeekStatusMatrix'
 
-        // ===== 获取申请详情 =====
-        const application = await getApplicationInfo(applicationID)
-        if (!application) {
-            return {
-                code: 404,
-                message: '申请不存在',
-                data: null
-            }
-        }
-
-        // 检查申请状态是否为待审核(0)
-        if (application.rentalStatus !== 0) {
-            return {
-                code: 400,
-                message: `申请状态不合法（当前状态: ${application.rentalStatus}），只能批准待审核的申请`,
-                data: null
-            }
-        }
-
-        // ===== 获取教室信息 =====
-        const classroom = await getClassroomInfo(application.classroomApplied)
-        if (!classroom) {
-            return {
-                code: 404,
-                message: '教室不存在',
-                data: null
-            }
-        }
-
-        // ===== 再次检查讲次是否仍可用（防止并发） =====
-        const matrixFieldName = application.rentWeek === 'this'
-            ? 'thisWeekStatusMatrix'
-            : 'nextWeekStatusMatrix'
-
-        const currentMatrix = classroom[matrixFieldName]
-
-        if (!checkLecturesStillAvailable(currentMatrix, application.rentDayOfWeek, application.rentLectures)) {
-            return {
-                code: 409,
-                message: '教室讲次已被占用或发生并发修改，请刷新后重试',
-                data: null
-            }
-        }
-
-        // ===== 更新矩阵 =====
-        const updatedMatrix = updateMatrixToOccupied(currentMatrix, application.rentDayOfWeek, application.rentLectures)
-        const now = new Date().getTime()
-
-        // ===== 同时更新申请和教室（事务性操作） =====
-        // 由于微信云数据库不支持真正的事务，这里按顺序更新
-        // 先更新申请，再更新教室
-
-        // 更新申请状态
-        await db.collection('Applications')
-            .doc(applicationID)
-            .update({
-                data: {
-                    rentalStatus: 1,        // 已批准
-                    approvedAt: now,
-                    updatedAt: now
-                }
-            })
-
-        // 更新教室矩阵
-        const updateData = {
-            [matrixFieldName]: updatedMatrix,
-            updatedAt: now
-        }
-
-        await db.collection('Classrooms')
-            .doc(application.classroomApplied)
-            .update({
-                data: updateData
-            })
-
-        return {
-            code: 0,
-            message: '申请已批准',
-            data: {
-                applicationID: applicationID,
-                status: 1,
-                approvedAt: now,
-                classroomUpdated: true,
-                affectedLectures: application.rentLectures,
-                classroomID: classroom.classroomID,
-                rentDate: application.rentDate
-            }
-        }
-    } catch (error) {
-        console.error('approveApplication 错误:', error)
-        return {
-            code: 500,
-            message: '批准失败',
-            error: error.message
-        }
+    if (!checkLecturesAvailable(classroom[matrixFieldName], application.rentDayOfWeek, application.rentLectures)) {
+      return fail(409, '教室讲次已被占用或发生并发修改，请刷新后重试')
     }
+
+    // ===== 原子性更新：申请状态 + 教室矩阵 =====
+    const updatedMatrix = occupyLectures(classroom[matrixFieldName], application.rentDayOfWeek, application.rentLectures)
+    const now = Date.now()
+
+    // 更新申请
+    await db.collection('Applications').doc(applicationID).update({
+      data: {
+        rentalStatus: 1,
+        approverID,
+        approvedAt: now,
+        approvedClassroomId: isAlternative ? targetClassroomId : undefined,
+        updatedAt: now
+      }
+    })
+
+    // 更新教室矩阵
+    await db.collection('Classrooms').doc(targetClassroomId).update({
+      data: {
+        [matrixFieldName]: updatedMatrix,
+        updatedAt: now
+      }
+    })
+
+    // 审计日志
+    logAudit(db, {
+      action: 'approve',
+      targetType: 'application',
+      targetId: applicationID,
+      adminId: approverID,
+      details: {
+        classroomId: targetClassroomId,
+        isAlternative,
+        originalClassroomId: application.classroomApplied,
+        rentDate: application.rentDate,
+        lectures: application.rentLectures
+      }
+    })
+
+    return success({
+      applicationID,
+      status: 1,
+      approvedAt: now,
+      classroomId: targetClassroomId,
+      isAlternative,
+      affectedLectures: application.rentLectures,
+      rentDate: application.rentDate
+    })
+  } catch (err) {
+    if (err.code && err.message) return err
+    console.error('approveApplication 错误:', err)
+    return fail(500, '批准失败', err.message)
+  }
 }

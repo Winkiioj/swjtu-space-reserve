@@ -1,0 +1,36 @@
+<view class="adm-page">
+  <!-- 头部 -->
+  <view class="adm-card" style="margin-bottom: 30rpx;">
+    <text style="font-size: 36rpx; font-weight: 700; color: var(--adm-text-primary); display: block;">欢迎，管理员</text>
+    <text style="font-size: 26rpx; color: var(--adm-text-secondary); margin-top: 8rpx; display: block;">{{currentDate}}</text>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-grid">
+    <view class="stat-card" bindtap="goToReview">
+      <text class="stat-num">{{pendingCount}}</text>
+      <text class="stat-label">待审核申请</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-num">{{totalClassrooms}}</text>
+      <text class="stat-label">教室总数</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-num">{{todayReservations}}</text>
+      <text class="stat-label">今日预定</text>
+    </view>
+  </view>
+
+  <!-- 快捷入口 -->
+  <view class="adm-section-title">快捷操作</view>
+  <view class="quick-menu">
+    <view class="menu-item" bindtap="goToReview">
+      <text class="menu-icon">📋</text>
+      <text class="menu-text">审核申请</text>
+    </view>
+    <view class="menu-item" bindtap="goToInit">
+      <text class="menu-icon">⚙️</text>
+      <text class="menu-text">数据导入</text>
+    </view>
+  </view>
+</view>

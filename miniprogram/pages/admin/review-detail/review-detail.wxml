@@ -1,0 +1,58 @@
+<view class="adm-page">
+  <!-- 申请信息 -->
+  <view class="adm-card">
+    <view class="adm-section-title">申请信息</view>
+
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请人</text>
+      <text class="adm-info-value">{{application.userName}} ({{application.proposerID}})</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">联系电话</text>
+      <text class="adm-info-value">{{applicantPhone}}</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请教室</text>
+      <text class="adm-info-value">{{classroomInfo.buildingBelong}} {{classroomInfo.classroomID}}</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">教室容量</text>
+      <text class="adm-info-value">{{classroomInfo.containNumber}} 人</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请日期</text>
+      <text class="adm-info-value">{{application.rentDate}} 周{{application.rentDayOfWeek + 1}}</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请讲次</text>
+      <text class="adm-info-value">{{lecturesStr}}</text>
+    </view>
+    <view class="adm-info-row" style="border-bottom: none;">
+      <text class="adm-info-label">事由</text>
+      <text class="adm-info-value">{{application.rentalDetail}}</text>
+    </view>
+  </view>
+
+  <!-- 替代教室 -->
+  <view class="adm-card">
+    <view class="adm-section-title">推荐替代教室</view>
+    <radio-group bindchange="onSelectAlternative">
+      <label wx:for="{{alternatives}}" wx:key="index" class="radio-item">
+        <radio value="{{item._id}}" checked="{{selectedAlternativeId === item._id}}" color="#4a6cf7"/>
+        <view class="radio-content">
+          <text class="radio-name">{{item.buildingBelong}} {{item.classroomID}}</text>
+          <text class="radio-capacity">容量 {{item.containNumber}} 人</text>
+        </view>
+      </label>
+    </radio-group>
+    <view wx:if="{{alternatives.length === 0}}" class="adm-empty" style="padding: 30rpx 0;">
+      <text>暂无其他可用教室，可使用原教室或拒绝申请</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <button class="adm-btn adm-btn-primary" bindtap="approve" disabled="{{processing}}">通过申请</button>
+    <button class="adm-btn adm-btn-danger" bindtap="reject" disabled="{{processing}}">拒绝申请</button>
+  </view>
+</view>

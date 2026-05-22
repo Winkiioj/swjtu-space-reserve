@@ -1,0 +1,193 @@
+/**
+ * admin-theme.wxss — 管理员模块统一设计系统
+ *
+ * 所有管理页面通过 @import 引用此文件。
+ * 使用 CSS 变量统一管理色彩、圆角、阴影等设计令牌。
+ * 页面私有样式仅写覆盖项。
+ */
+
+/* ========== CSS 变量（设计令牌） ========== */
+page {
+  --adm-primary: #4a6cf7;
+  --adm-primary-dark: #3b5de7;
+  --adm-primary-light: #eef1ff;
+  --adm-success: #22c55e;
+  --adm-danger: #ef4444;
+  --adm-warning: #f59e0b;
+  --adm-info: #3b82f6;
+  --adm-bg: #f0f2f5;
+  --adm-card-bg: #ffffff;
+  --adm-text-primary: #1e293b;
+  --adm-text-secondary: #64748b;
+  --adm-text-muted: #94a3b8;
+  --adm-border: #e2e8f0;
+  --adm-radius-sm: 12rpx;
+  --adm-radius-md: 20rpx;
+  --adm-radius-lg: 28rpx;
+  --adm-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+  --adm-shadow-lg: 0 8rpx 24rpx rgba(0, 0, 0, 0.1);
+}
+
+/* ========== 顶层容器 ========== */
+.adm-page {
+  padding: 30rpx;
+  background: var(--adm-bg);
+  min-height: 100vh;
+}
+
+/* ========== 卡片 ========== */
+.adm-card {
+  background: var(--adm-card-bg);
+  border-radius: var(--adm-radius-md);
+  padding: 30rpx;
+  margin-bottom: 24rpx;
+  box-shadow: var(--adm-shadow);
+}
+
+.adm-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20rpx;
+  margin-bottom: 20rpx;
+  border-bottom: 2rpx solid var(--adm-border);
+}
+
+/* ========== 标题 ========== */
+.adm-section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--adm-text-primary);
+  padding-left: 16rpx;
+  border-left: 6rpx solid var(--adm-primary);
+  margin-bottom: 24rpx;
+}
+
+/* ========== 按钮 ========== */
+.adm-btn {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  border-radius: var(--adm-radius-lg);
+  font-size: 30rpx;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.adm-btn-primary {
+  background: var(--adm-primary);
+  color: #fff;
+}
+
+.adm-btn-primary:active {
+  background: var(--adm-primary-dark);
+}
+
+.adm-btn-danger {
+  background: var(--adm-danger);
+  color: #fff;
+}
+
+.adm-btn-outline {
+  border: 2rpx solid var(--adm-primary);
+  color: var(--adm-primary);
+  background: transparent;
+}
+
+/* ========== 状态徽标 ========== */
+.adm-badge {
+  display: inline-block;
+  padding: 4rpx 20rpx;
+  border-radius: 30rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+}
+
+.adm-badge-pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.adm-badge-approved {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.adm-badge-rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.adm-badge-completed {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+/* ========== 信息行（标签+值） ========== */
+.adm-info-row {
+  display: flex;
+  padding: 12rpx 0;
+  font-size: 28rpx;
+  border-bottom: 1rpx solid var(--adm-border);
+}
+
+.adm-info-row:last-child {
+  border-bottom: none;
+}
+
+.adm-info-label {
+  width: 160rpx;
+  color: var(--adm-text-secondary);
+  flex-shrink: 0;
+}
+
+.adm-info-value {
+  flex: 1;
+  color: var(--adm-text-primary);
+  word-break: break-all;
+}
+
+/* ========== 空状态 ========== */
+.adm-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 0;
+  color: var(--adm-text-muted);
+  font-size: 28rpx;
+}
+
+.adm-empty image {
+  width: 240rpx;
+  height: 240rpx;
+  margin-bottom: 24rpx;
+}
+
+/* ========== 加载态 ========== */
+.adm-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60rpx 0;
+  color: var(--adm-text-muted);
+  font-size: 26rpx;
+}
+
+/* ========== 操作按钮组（固定在底部） ========== */
+.adm-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx 30rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: var(--adm-card-bg);
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: 20rpx;
+}
+
+.adm-action-bar .adm-btn {
+  flex: 1;
+  margin-bottom: 0;
+}
