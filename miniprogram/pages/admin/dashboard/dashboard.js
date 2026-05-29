@@ -5,7 +5,7 @@ Page({
   data: {
     pendingCount: 0,
     totalClassrooms: 0,
-    todayReservations: 0,
+    reviewedCount: 0,
     currentDate: ''
   },
 
@@ -40,11 +40,14 @@ Page({
   async loadStats() {
     wx.showLoading({ title: '加载中' })
     try {
-      const stats = await AdminAPI.getStats()
+      const [stats, reviewed] = await Promise.all([
+        AdminAPI.getStats(),
+        AdminAPI.getReviewedApplications(1, 1)
+      ])
       this.setData({
         pendingCount: stats.pendingCount,
         totalClassrooms: stats.totalClassrooms,
-        todayReservations: stats.todayReservations
+        reviewedCount: reviewed.total || 0
       })
     } catch (err) {
       console.error(err)
@@ -59,5 +62,9 @@ Page({
 
   goToInit() {
     wx.navigateTo({ url: '/pages/admin/init-data/init-data' })
+  },
+
+  goToReviewed() {
+    wx.navigateTo({ url: '/pages/admin/review-list/review-list?type=reviewed' })
   }
 })

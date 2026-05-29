@@ -42,11 +42,11 @@ function occupyLectures(matrix, dayOfWeek, lectures) {
 
 exports.main = async (event) => {
   try {
-    const { applicationID, approverID, approvedClassroomId } = event
-    if (!applicationID || !approverID) return fail(400, '参数缺失')
+    const { applicationID, currentUserID, approvedClassroomId } = event
+    if (!applicationID || !currentUserID) return fail(400, '参数缺失')
 
     // ===== 管理员身份校验 =====
-    await requireAdmin(db, approverID)
+    await requireAdmin(db, currentUserID)
 
     // ===== 获取申请 =====
     const application = await getApplicationInfo(applicationID)
@@ -79,7 +79,7 @@ exports.main = async (event) => {
     await db.collection('Applications').doc(applicationID).update({
       data: {
         rentalStatus: 1,
-        approverID,
+        approverID: currentUserID,
         approvedAt: now,
         approvedClassroomId: isAlternative ? targetClassroomId : undefined,
         updatedAt: now
@@ -99,7 +99,7 @@ exports.main = async (event) => {
       action: 'approve',
       targetType: 'application',
       targetId: applicationID,
-      adminId: approverID,
+      adminId: currentUserID,
       details: {
         classroomId: targetClassroomId,
         isAlternative,

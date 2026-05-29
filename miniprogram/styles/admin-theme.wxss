@@ -72,6 +72,9 @@ page {
   font-size: 30rpx;
   text-align: center;
   margin-bottom: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .adm-btn-primary {
@@ -86,6 +89,20 @@ page {
 .adm-btn-danger {
   background: var(--adm-danger);
   color: #fff;
+}
+
+.adm-btn-warning {
+  background: var(--adm-warning);
+  color: #fff;
+}
+
+.adm-btn-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.adm-btn-active {
+  opacity: 0.85;
 }
 
 .adm-btn-outline {

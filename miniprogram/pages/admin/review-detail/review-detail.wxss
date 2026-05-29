@@ -1,33 +1,32 @@
 @import '../../../styles/admin-theme.wxss';
 
-.radio-item {
-  display: flex;
-  align-items: center;
+.alt-item {
   padding: 20rpx 0;
   border-bottom: 2rpx solid var(--adm-border);
 }
 
-.radio-item:last-child {
+.alt-item:last-child {
   border-bottom: none;
 }
 
-.radio-content {
-  margin-left: 16rpx;
-  flex: 1;
+.alt-info {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
 }
 
-.radio-name {
-  display: block;
+.alt-name {
   font-size: 28rpx;
   font-weight: 500;
   color: var(--adm-text-primary);
+  background: var(--adm-primary-light);
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
 }
 
-.radio-capacity {
-  display: block;
+.alt-capacity {
   font-size: 24rpx;
   color: var(--adm-text-secondary);
-  margin-top: 4rpx;
 }
 
 .action-buttons {

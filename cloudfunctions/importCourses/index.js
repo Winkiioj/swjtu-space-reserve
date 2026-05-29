@@ -36,7 +36,7 @@ exports.main = async (event) => {
 
       // 同时更新本周和下周矩阵
       for (const matrixField of ['thisWeekStatusMatrix', 'nextWeekStatusMatrix']) {
-        const matrix = JSON.parse(JSON.stringify(classRes.data[matrixField]))
+        const matrix = JSON.parse(JSON.stringify(classRes.data[0][matrixField]))
 
         // 检查是否已经导入（幂等性）
         let alreadySet = true

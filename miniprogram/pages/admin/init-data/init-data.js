@@ -28,7 +28,11 @@ Page({
     // 课表导入弹框
     showCourseModal: false,
     courseJson: '',
-    importingCourses: false
+    importingCourses: false,
+
+    // 教室 JSON 导入弹框
+    showClassroomModal: false,
+    classroomJson: ''
   },
 
   // ===== Picker 变更 =====
@@ -128,6 +132,59 @@ Page({
         logs: [newLog, ...this.data.logs],
         classroomList: []
       })
+      wx.showToast({ title: `导入完成：${detail}` })
+    } catch (err) {
+      wx.hideLoading()
+      this.setData({ importing: false })
+      wx.showToast({ title: err.message || '导入失败', icon: 'none' })
+    }
+  },
+
+  // ===== 教室 JSON 导入 =====
+  showClassroomImport() {
+    this.setData({ showClassroomModal: true, classroomJson: '' })
+  },
+
+  closeClassroomModal() {
+    this.setData({ showClassroomModal: false, classroomJson: '' })
+  },
+
+  onClassroomJsonInput(e) {
+    this.setData({ classroomJson: e.detail.value })
+  },
+
+  async submitClassroomImport() {
+    const raw = this.data.classroomJson.trim()
+    if (!raw) {
+      wx.showToast({ title: '请粘贴教室 JSON 数据', icon: 'none' })
+      return
+    }
+
+    let classrooms
+    try {
+      classrooms = JSON.parse(raw)
+    } catch (e) {
+      wx.showToast({ title: 'JSON 格式错误，请检查', icon: 'none' })
+      return
+    }
+
+    if (!Array.isArray(classrooms) || classrooms.length === 0) {
+      wx.showToast({ title: '教室数据应为非空数组', icon: 'none' })
+      return
+    }
+
+    if (this.data.importing) return
+    this.setData({ importing: true })
+    wx.showLoading({ title: '导入教室中...' })
+
+    try {
+      const result = await AdminAPI.importClassrooms(classrooms)
+      wx.hideLoading()
+      this.setData({ importing: false, showClassroomModal: false, classroomJson: '' })
+
+      const detail = `新增 ${result.added} 间，跳过 ${result.skipped} 间（共 ${result.total} 间）`
+      const newLog = `[${new Date().toLocaleTimeString()}] 导入教室(JSON)：${detail}`
+      this.setData({ logs: [newLog, ...this.data.logs] })
       wx.showToast({ title: `导入完成：${detail}` })
     } catch (err) {
       wx.hideLoading()

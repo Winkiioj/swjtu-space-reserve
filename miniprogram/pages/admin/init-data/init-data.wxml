@@ -57,7 +57,8 @@
 
     <!-- 生成按钮 -->
     <view class="form-actions">
-      <button class="btn-generate" bindtap="generateClassrooms">添加教室批次</button>
+      <view class="btn-generate" hover-class="btn-generate-active" bindtap="generateClassrooms">添加教室批次</view>
+      <view class="btn-generate" hover-class="btn-generate-active" style="margin-top: 16rpx; background: var(--adm-text-secondary);" bindtap="showClassroomImport">JSON导入教室</view>
     </view>
   </view>
 
@@ -79,9 +80,25 @@
       </view>
     </scroll-view>
 
-    <button class="adm-btn adm-btn-primary" bindtap="doImport" disabled="{{importing}}" style="margin-top: 20rpx;">
+    <view class="adm-btn adm-btn-primary {{importing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{importing ? '' : 'doImport'}}" style="margin-top: 20rpx;">
       {{importing ? '导入中...' : '确认导入 ' + classroomList.length + ' 间教室'}}
-    </button>
+    </view>
+  </view>
+
+  <!-- ===== 教室 JSON 粘贴弹框 ===== -->
+  <view wx:if="{{showClassroomModal}}" class="modal-overlay" catchtouchmove="noop">
+    <view class="modal-content">
+      <text class="modal-title">粘贴教室 JSON</text>
+      <scroll-view scroll-y class="modal-scroll">
+        <textarea class="modal-textarea" value="{{classroomJson}}" bindinput="onClassroomJsonInput" placeholder='[{"buildingBelong":"一号教学楼","classroomID":"x1101","containNumber":90,"description":"多媒体教室"}]' maxlength="-1" />
+      </scroll-view>
+      <view class="modal-actions">
+        <view class="adm-btn adm-btn-outline" hover-class="adm-btn-active" bindtap="closeClassroomModal" style="flex:1;">取消</view>
+        <view class="adm-btn adm-btn-primary {{importing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{importing ? '' : 'submitClassroomImport'}}" style="flex:1; margin-left: 20rpx;">
+          {{importing ? '导入中...' : '确认导入'}}
+        </view>
+      </view>
+    </view>
   </view>
 
   <!-- ===== 课表导入（入口保留） ===== -->
@@ -90,19 +107,21 @@
     <text style="font-size: 26rpx; color: var(--adm-text-secondary); display: block; margin-bottom: 24rpx;">
       粘贴课表 JSON 数据，系统将自动标记教室占用讲次。
     </text>
-    <button class="adm-btn adm-btn-outline" bindtap="showCourseImport">导入课表</button>
+    <view class="adm-btn adm-btn-outline" hover-class="adm-btn-active" bindtap="showCourseImport">导入课表</view>
   </view>
 
   <!-- ===== 课表 JSON 粘贴弹框 ===== -->
   <view wx:if="{{showCourseModal}}" class="modal-overlay" catchtouchmove="noop">
     <view class="modal-content">
       <text class="modal-title">粘贴课表 JSON</text>
-      <textarea class="modal-textarea" value="{{courseJson}}" bindinput="onCourseJsonInput" placeholder='[{"classroomID":"x2101","courseID":"CS101","courseName":"高等数学","schedule":{"dayOfWeek":0,"startLecture":0,"endLecture":2}}]' maxlength="-1" auto-height />
+      <scroll-view scroll-y class="modal-scroll">
+        <textarea class="modal-textarea" value="{{courseJson}}" bindinput="onCourseJsonInput" placeholder='[{"classroomID":"x2101","courseID":"CS101","courseName":"高等数学","schedule":{"dayOfWeek":0,"startLecture":0,"endLecture":2}}]' maxlength="-1" />
+      </scroll-view>
       <view class="modal-actions">
-        <button class="adm-btn adm-btn-outline" bindtap="closeCourseModal" style="flex:1;">取消</button>
-        <button class="adm-btn adm-btn-primary" bindtap="submitCourseImport" disabled="{{importingCourses}}" style="flex:1; margin-left: 20rpx;">
+        <view class="adm-btn adm-btn-outline" hover-class="adm-btn-active" bindtap="closeCourseModal" style="flex:1;">取消</view>
+        <view class="adm-btn adm-btn-primary {{importingCourses ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{importingCourses ? '' : 'submitCourseImport'}}" style="flex:1; margin-left: 20rpx;">
           {{importingCourses ? '导入中...' : '确认导入'}}
-        </button>
+        </view>
       </view>
     </view>
   </view>

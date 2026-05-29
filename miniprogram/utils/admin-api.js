@@ -68,6 +68,16 @@ const AdminAPI = {
   /** 导入座位 */
   importSeats(seats) {
     return call('importSeats', { seats })
+  },
+
+  /** 获取最近已审核的申请（分页） */
+  getReviewedApplications(page = 1, pageSize = 20) {
+    return call('getReviewedApplications', { page, pageSize })
+  },
+
+  /** 撤销审核 */
+  revokeReview(applicationID) {
+    return call('revokeReview', { applicationID })
   }
 }
 

@@ -64,16 +64,16 @@
 .btn-generate {
   width: 100%;
   height: 80rpx;
-  line-height: 80rpx;
   background: var(--adm-primary);
   color: #fff;
   border-radius: var(--adm-radius-lg);
   font-size: 28rpx;
-  text-align: center;
-  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-generate:active {
+.btn-generate-active {
   opacity: 0.85;
 }
 
@@ -150,9 +150,14 @@
   margin-bottom: 24rpx;
 }
 
+.modal-scroll {
+  max-height: 500rpx;
+  margin-bottom: 24rpx;
+}
+
 .modal-textarea {
   width: 100%;
-  min-height: 300rpx;
+  height: 400rpx;
   padding: 20rpx;
   background: var(--adm-bg);
   border-radius: var(--adm-radius-sm);

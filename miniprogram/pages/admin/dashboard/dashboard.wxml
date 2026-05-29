@@ -15,9 +15,9 @@
       <text class="stat-num">{{totalClassrooms}}</text>
       <text class="stat-label">教室总数</text>
     </view>
-    <view class="stat-card">
-      <text class="stat-num">{{todayReservations}}</text>
-      <text class="stat-label">今日预定</text>
+    <view class="stat-card" bindtap="goToReviewed">
+      <text class="stat-num">{{reviewedCount}}</text>
+      <text class="stat-label">最近已审核</text>
     </view>
   </view>
 

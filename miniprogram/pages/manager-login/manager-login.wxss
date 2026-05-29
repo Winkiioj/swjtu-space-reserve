@@ -69,17 +69,23 @@
 .login-btn {
   width: 100%;
   height: 88rpx;
-  line-height: 88rpx;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
   border-radius: 60rpx;
   font-size: 32rpx;
   font-weight: 600;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.login-btn:active {
+.login-btn-active {
   opacity: 0.9;
+}
+
+.login-btn-disabled {
+  opacity: 0.5;
+  pointer-events: none;
 }
 
 .footer {

@@ -3,6 +3,8 @@ const AdminAPI = require('../../../utils/admin-api')
 
 Page({
   data: {
+    type: 'pending',    // pending | reviewed
+    pageTitle: '待审核申请',
     applications: [],
     page: 1,
     pageSize: 20,
@@ -10,21 +12,31 @@ Page({
     loading: false
   },
 
+  onLoad(options) {
+    if (options.type === 'reviewed') {
+      this.setData({
+        type: 'reviewed',
+        pageTitle: '最近已审核'
+      })
+      wx.setNavigationBarTitle({ title: '最近已审核' })
+    }
+  },
+
   onShow() {
-    this.loadPending(true)
+    this.loadList(true)
   },
 
   onPullDownRefresh() {
-    this.loadPending(true).then(() => wx.stopPullDownRefresh())
+    this.loadList(true).then(() => wx.stopPullDownRefresh())
   },
 
   onReachBottom() {
     if (this.data.hasMore && !this.data.loading) {
-      this.loadPending()
+      this.loadList()
     }
   },
 
-  async loadPending(reset = false) {
+  async loadList(reset = false) {
     if (this.data.loading) return
     this.setData({ loading: true })
     if (reset) {
@@ -32,11 +44,11 @@ Page({
     }
 
     try {
-      const result = await AdminAPI.getPendingApplications(
-        reset ? 1 : this.data.page,
-        this.data.pageSize
-      )
+      const fn = this.data.type === 'reviewed'
+        ? AdminAPI.getReviewedApplications(reset ? 1 : this.data.page, this.data.pageSize)
+        : AdminAPI.getPendingApplications(reset ? 1 : this.data.page, this.data.pageSize)
 
+      const result = await fn
       const list = result.applications || []
       const total = result.total || 0
 

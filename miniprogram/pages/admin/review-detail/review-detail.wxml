@@ -27,32 +27,43 @@
       <text class="adm-info-label">申请讲次</text>
       <text class="adm-info-value">{{lecturesStr}}</text>
     </view>
-    <view class="adm-info-row" style="border-bottom: none;">
+    <view wx:if="{{isReviewed}}" class="adm-info-row">
+      <text class="adm-info-label">审核状态</text>
+      <text class="adm-info-value"><text class="adm-badge {{application.rentalStatus === 1 ? 'adm-badge-approved' : 'adm-badge-rejected'}}">{{statusText}}</text></text>
+    </view>
+    <view wx:if="{{application.rentalStatus === 2}}" class="adm-info-row" style="border-bottom: none;">
+      <text class="adm-info-label">拒绝原因</text>
+      <text class="adm-info-value">{{application.rejectionReason}}</text>
+    </view>
+    <view wx:if="{{application.rentalStatus !== 2}}" class="adm-info-row" style="border-bottom: none;">
       <text class="adm-info-label">事由</text>
       <text class="adm-info-value">{{application.rentalDetail}}</text>
     </view>
   </view>
 
-  <!-- 替代教室 -->
-  <view class="adm-card">
+  <!-- 替代教室（只读展示，未审核时才显示） -->
+  <view wx:if="{{!isReviewed}}" class="adm-card">
     <view class="adm-section-title">推荐替代教室</view>
-    <radio-group bindchange="onSelectAlternative">
-      <label wx:for="{{alternatives}}" wx:key="index" class="radio-item">
-        <radio value="{{item._id}}" checked="{{selectedAlternativeId === item._id}}" color="#4a6cf7"/>
-        <view class="radio-content">
-          <text class="radio-name">{{item.buildingBelong}} {{item.classroomID}}</text>
-          <text class="radio-capacity">容量 {{item.containNumber}} 人</text>
-        </view>
-      </label>
-    </radio-group>
+    <view wx:for="{{alternatives}}" wx:key="index" class="alt-item">
+      <view class="alt-info">
+        <text class="alt-name">{{item.buildingBelong}} {{item.classroomID}}</text>
+        <text class="alt-capacity">容量 {{item.containNumber}} 人</text>
+      </view>
+    </view>
     <view wx:if="{{alternatives.length === 0}}" class="adm-empty" style="padding: 30rpx 0;">
-      <text>暂无其他可用教室，可使用原教室或拒绝申请</text>
+      <text>暂无其他可用教室</text>
     </view>
   </view>
 
   <!-- 操作按钮 -->
   <view class="action-buttons">
-    <button class="adm-btn adm-btn-primary" bindtap="approve" disabled="{{processing}}">通过申请</button>
-    <button class="adm-btn adm-btn-danger" bindtap="reject" disabled="{{processing}}">拒绝申请</button>
+    <block wx:if="{{!isReviewed}}">
+      <view class="adm-btn adm-btn-primary {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'approve'}}">通过申请</view>
+      <view wx:if="{{alternatives.length > 0}}" class="adm-btn adm-btn-warning {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'rejectWithRecommend'}}">拒绝并推荐替代教室</view>
+      <view class="adm-btn adm-btn-danger {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'reject'}}">拒绝申请</view>
+    </block>
+    <block wx:else>
+      <view class="adm-btn adm-btn-warning {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'revoke'}}">撤销审核</view>
+    </block>
   </view>
 </view>
