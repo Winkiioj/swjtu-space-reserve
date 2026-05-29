@@ -1,102 +1,133 @@
-<!-- miniprogram/pages/seat/seat.wxml -->
 <view class="container">
+  <!-- 顶部装饰头 -->
+  <view class="header-banner">
+    <view class="header-icon">📍</view>
+    <view class="header-text">
+      <text class="header-title">座位预约</text>
+      <text class="header-subtitle">选择心仪的座位，高效学习</text>
+    </view>
+    <view class="header-link" bindtap="goToMyReservations">我的预约 ›</view>
+  </view>
+
   <!-- 日期选择 -->
   <view class="section">
-    <text class="section-title">预约日期</text>
-    <radio-group class="radio-group" bindchange="onDateChange">
-      <label class="radio-label">
-        <radio value="this" checked/><text>今天（{{todayDate}}）</text>
+    <view class="section-header">
+      <text class="section-icon">📅</text>
+      <text class="section-title">预约日期</text>
+    </view>
+    <radio-group class="date-group" bindchange="onDateChange">
+      <label class="date-card {{dayType === 'this' ? 'date-active' : ''}}">
+        <radio value="this" checked="{{dayType === 'this'}}" class="date-radio"/>
+        <view class="date-info">
+          <text class="date-label">今天</text>
+          <text class="date-value">{{todayDate}}</text>
+        </view>
+        <view class="date-badge">推荐</view>
       </label>
-      <label class="radio-label">
-        <radio value="next"/><text>明天（{{tomorrowDate}}）</text>
+      <label class="date-card {{dayType === 'next' ? 'date-active' : ''}}">
+        <radio value="next" checked="{{dayType === 'next'}}" class="date-radio"/>
+        <view class="date-info">
+          <text class="date-label">明天</text>
+          <text class="date-value">{{tomorrowDate}}</text>
+        </view>
       </label>
     </radio-group>
   </view>
 
-  <!-- 讲次分组选择：上午 / 下午 / 晚上 -->
+  <!-- 快捷选择时段 & 讲次选择 -->
   <view class="section">
-    <text class="section-title">选择讲次（可多选）</text>
-    <!-- 上午组 -->
-    <view class="lecture-group">
-      <view class="group-title">上午</view>
-      <checkbox-group bindchange="onLectureChange">
-        <view class="lecture-row">
-          <label wx:for="{{morningLectures}}" wx:key="index" class="lecture-item">
-            <checkbox value="{{item.index}}"/>
-            <text>{{item.label}}</text>
-          </label>
-        </view>
-      </checkbox-group>
+    <view class="section-header">
+      <text class="section-icon">🕐</text>
+      <text class="section-title">选择讲次</text>
+      <text class="section-tip">可多选</text>
     </view>
-    <!-- 下午组 -->
-    <view class="lecture-group">
-      <view class="group-title">下午</view>
-      <checkbox-group bindchange="onLectureChange">
-        <view class="lecture-row">
-          <label wx:for="{{afternoonLectures}}" wx:key="index" class="lecture-item">
-            <checkbox value="{{item.index}}"/>
-            <text>{{item.label}}</text>
-          </label>
-        </view>
-      </checkbox-group>
+
+    <!-- 快捷选择按钮 -->
+    <view class="period-bar">
+      <view class="period-btn {{periodStates.morning ? 'period-active' : ''}}"
+            bindtap="togglePeriod" data-period="morning">
+        <text class="period-icon">🌅</text>
+        <text class="period-label">上午</text>
+        <text class="period-range">08:00-12:25</text>
+      </view>
+      <view class="period-btn {{periodStates.afternoon ? 'period-active' : ''}}"
+            bindtap="togglePeriod" data-period="afternoon">
+        <text class="period-icon">☀️</text>
+        <text class="period-label">下午</text>
+        <text class="period-range">14:00-18:15</text>
+      </view>
+      <view class="period-btn {{periodStates.evening ? 'period-active' : ''}}"
+            bindtap="togglePeriod" data-period="evening">
+        <text class="period-icon">🌙</text>
+        <text class="period-label">晚上</text>
+        <text class="period-range">19:30-21:55</text>
+      </view>
     </view>
-    <!-- 晚上组 -->
-    <view class="lecture-group">
-      <view class="group-title">晚上</view>
-      <checkbox-group bindchange="onLectureChange">
-        <view class="lecture-row">
-          <label wx:for="{{eveningLectures}}" wx:key="index" class="lecture-item">
-            <checkbox value="{{item.index}}"/>
-            <text>{{item.label}}</text>
-          </label>
+
+    <!-- 讲次分组（三组独立，JS 合并处理） -->
+    <view class="lecture-section">
+      <!-- 上午组 -->
+      <view class="lecture-group">
+        <view class="group-header">
+          <text class="group-title">🌅 上午</text>
+          <text class="group-range">08:00 - 12:25</text>
         </view>
-      </checkbox-group>
+        <checkbox-group bindchange="onMorningChange">
+          <view class="lecture-grid">
+            <label wx:for="{{morningLectures}}" wx:key="index"
+                  class="lecture-item {{selectedLectures.indexOf(item.index) !== -1 ? 'lecture-checked' : ''}}">
+              <checkbox value="{{item.index}}" class="lecture-checkbox"/>
+              <text class="lecture-label">{{item.label}}</text>
+            </label>
+          </view>
+        </checkbox-group>
+      </view>
+
+      <!-- 下午组 -->
+      <view class="lecture-group">
+        <view class="group-header">
+          <text class="group-title">☀️ 下午</text>
+          <text class="group-range">14:00 - 18:15</text>
+        </view>
+        <checkbox-group bindchange="onAfternoonChange">
+          <view class="lecture-grid">
+            <label wx:for="{{afternoonLectures}}" wx:key="index"
+                  class="lecture-item {{selectedLectures.indexOf(item.index) !== -1 ? 'lecture-checked' : ''}}">
+              <checkbox value="{{item.index}}" class="lecture-checkbox"/>
+              <text class="lecture-label">{{item.label}}</text>
+            </label>
+          </view>
+        </checkbox-group>
+      </view>
+
+      <!-- 晚上组 -->
+      <view class="lecture-group">
+        <view class="group-header">
+          <text class="group-title">🌙 晚上</text>
+          <text class="group-range">19:30 - 21:55</text>
+        </view>
+        <checkbox-group bindchange="onEveningChange">
+          <view class="lecture-grid">
+            <label wx:for="{{eveningLectures}}" wx:key="index"
+                  class="lecture-item {{selectedLectures.indexOf(item.index) !== -1 ? 'lecture-checked' : ''}}">
+              <checkbox value="{{item.index}}" class="lecture-checkbox"/>
+              <text class="lecture-label">{{item.label}}</text>
+            </label>
+          </view>
+        </checkbox-group>
+      </view>
+    </view>
+
+    <!-- 已选讲次摘要 -->
+    <view wx:if="{{selectedLectures.length > 0}}" class="selection-summary">
+      <text class="summary-label">已选 {{selectedLectures.length}} 个讲次</text>
     </view>
   </view>
 
   <!-- 查询按钮 -->
-  <button type="primary" bindtap="searchSeats">查询空闲座位</button>
+  <button class="search-btn" bindtap="searchSeats">
+    <text wx:if="{{selectedLectures.length > 0}}">🔍 查询空闲座位（{{selectedLectures.length}}个讲次）</text>
+    <text wx:else>🔍 查询空闲座位</text>
+  </button>
 
-  <!-- 楼层 + 区域筛选栏（仅当有座位数据时显示） -->
-  <view wx:if="{{seatsRaw.length > 0}}" class="filter-section">
-    <view class="filter-title">筛选楼层和区域</view>
-    <!-- 楼层选择 -->
-    <view class="filter-row">
-      <text class="filter-label">楼层：</text>
-      <view class="filter-options">
-        <view wx:for="{{floors}}" wx:key="*this" 
-              class="filter-tag {{currentFloor === item ? 'active' : ''}}"
-              bindtap="selectFloor" data-floor="{{item}}">
-          {{item}}楼
-        </view>
-      </view>
-    </view>
-    <!-- 区域选择（根据当前楼层显示） -->
-    <view class="filter-row" wx:if="{{currentFloorAreas.length > 0}}">
-      <text class="filter-label">区域：</text>
-      <view class="filter-options">
-        <view wx:for="{{currentFloorAreas}}" wx:key="*this"
-              class="filter-tag {{currentArea === item ? 'active' : ''}}"
-              bindtap="selectArea" data-area="{{item}}">
-          {{item}}区
-        </view>
-      </view>
-    </view>
-    <!-- 确认筛选按钮 -->
-    <button class="confirm-btn" bindtap="applyFilter">查看座位</button>
-  </view>
-
-  <!-- 座位列表展示 -->
-  <view class="seat-list" wx:if="{{filteredSeats.length > 0}}">
-    <view class="seat-card" wx:for="{{filteredSeats}}" wx:key="_id" bindtap="reserveSeat" data-seat="{{item}}">
-      <text class="seat-id">{{item.seatID}}</text>
-      <text class="seat-info">{{item.areaBelong}} · {{item.seatType === 'standard' ? '普通座' : item.seatType}}</text>
-    </view>
-  </view>
-  <view wx:elif="{{seatsRaw.length > 0 && filteredSeats.length === 0}}" class="empty-tip">
-    当前区域没有空闲座位，请选择其他区域
-  </view>
-  <view wx:elif="{{seatsRaw.length === 0 && queried}}" class="empty-tip">
-    暂无空闲座位，请更换讲次或日期
-  </view>
 </view>

@@ -1,0 +1,42 @@
+<view class="container">
+  <view class="page-header">
+    <text class="page-title">📋 我的预约</text>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-state">
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 预约列表 -->
+  <view wx:elif="{{reservations.length > 0}}" class="list">
+    <view class="reservation-card" wx:for="{{reservations}}" wx:key="_id">
+      <view class="card-top">
+        <view class="card-seat-info">
+          <text class="card-seat-id">{{item.seatID}}</text>
+          <text class="card-area">{{item.areaBelong}}区</text>
+        </view>
+        <view class="card-status status-active">已预约</view>
+      </view>
+      <view class="card-divider"></view>
+      <view class="card-detail">
+        <view class="detail-row">
+          <text class="detail-label">📅 日期</text>
+          <text class="detail-value">{{item.date}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">🕐 讲次</text>
+          <text class="detail-value detail-lectures">{{item.lecturesLabel}}</text>
+        </view>
+      </view>
+      <button class="cancel-btn" bindtap="cancelReservation" data-item="{{item}}">取消预约</button>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:elif="{{!loading && reservations.length === 0}}" class="empty-state">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">暂无预约记录</text>
+    <text class="empty-hint">去座位图预约一个座位吧</text>
+  </view>
+</view>
