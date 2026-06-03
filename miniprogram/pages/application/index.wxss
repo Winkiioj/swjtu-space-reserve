@@ -1,0 +1,53 @@
+/* 我的申请 */
+.page { min-height: 100vh; background: #f5f6fa; padding-bottom: 48rpx; }
+
+/* 标签栏 */
+.tabs {
+  display: flex; background: #fff; padding: 16rpx 20rpx;
+  position: sticky; top: 0; z-index: 10;
+}
+.tab {
+  flex: 1; height: 68rpx; display: flex; align-items: center; justify-content: center;
+  font-size: 26rpx; color: #666; background: #f5f5f5; margin: 0 6rpx; border-radius: 8rpx;
+}
+.tab:first-child { margin-left: 0; }
+.tab:last-child { margin-right: 0; }
+.tab.on { background: #1677ff; color: #fff; }
+
+/* 列表 */
+.list { padding: 20rpx 24rpx; }
+
+.app-card {
+  background: #fff; border-radius: 16rpx; padding: 24rpx;
+  margin-bottom: 16rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.03);
+}
+
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12rpx; }
+.card-left { flex: 1; }
+.card-room { font-size: 28rpx; font-weight: 600; color: #1a1a1a; display: block; }
+.card-time { font-size: 24rpx; color: #999; display: block; margin-top: 6rpx; }
+
+.card-status { font-size: 22rpx; padding: 6rpx 16rpx; border-radius: 20rpx; font-weight: 500; }
+.s0 { background: #fff7e6; color: #d48806; }
+.s1 { background: #f6ffed; color: #389e0d; }
+.s2 { background: #fff2f0; color: #cf1322; }
+.s3,.s4 { background: #f5f5f5; color: #999; }
+
+.card-reason { font-size: 26rpx; color: #555; display: block; margin-bottom: 12rpx; }
+
+.card-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 12rpx; border-top: 1rpx solid #f5f5f5; }
+.card-date { font-size: 22rpx; color: #c0c0c0; }
+.card-cancel { font-size: 24rpx; color: #ff4d4f; }
+
+/* 空状态 */
+.empty { display: flex; flex-direction: column; align-items: center; padding: 120rpx 0; }
+.empty-icon { font-size: 80rpx; margin-bottom: 20rpx; opacity: 0.4; }
+.empty-text { font-size: 28rpx; color: #999; margin-bottom: 32rpx; }
+.empty-btn {
+  padding: 20rpx 48rpx; background: #1677ff; color: #fff;
+  border-radius: 40rpx; font-size: 28rpx;
+}
+
+/* 加载更多 */
+.more { text-align: center; padding: 24rpx; }
+.more-btn { font-size: 26rpx; color: #1677ff; }

@@ -1,0 +1,46 @@
+<view class="page">
+  <!-- 筛选标签栏 -->
+  <view class="tabs">
+    <view class="tab {{activeTab === 'all' ? 'on' : ''}}" bindtap="onTabChange" data-tab="all">全部</view>
+    <view class="tab {{activeTab === 'pending' ? 'on' : ''}}" bindtap="onTabChange" data-tab="pending">待审核</view>
+    <view class="tab {{activeTab === 'approved' ? 'on' : ''}}" bindtap="onTabChange" data-tab="approved">已通过</view>
+    <view class="tab {{activeTab === 'rejected' ? 'on' : ''}}" bindtap="onTabChange" data-tab="rejected">已拒绝</view>
+  </view>
+
+  <!-- 列表 -->
+  <view wx:if="{{applications.length > 0}}" class="list">
+    <view
+      class="app-card"
+      wx:for="{{applications}}"
+      wx:for-item="app"
+      wx:key="_id"
+    >
+      <view class="card-top" bindtap="onApplicationClick" data-id="{{app._id}}">
+        <view class="card-left">
+          <text class="card-room">{{app.classroomBuilding || ''}} {{app.classroomName || ''}}</text>
+          <text class="card-time">{{app.rentDate}} · {{getLectureText(app.rentLectures)}}</text>
+        </view>
+        <view class="card-status s{{app.rentalStatus}}">{{getStatusText(app.rentalStatus)}}</view>
+      </view>
+      <text class="card-reason">{{app.rentalDetail || ''}}</text>
+      <view class="card-bottom">
+        <text class="card-date">{{app.createdAt || ''}}</text>
+        <view wx:if="{{app.rentalStatus === 0 || app.rentalStatus === 1}}" class="card-cancel" catchtap="onCancel" data-id="{{app._id}}">
+          <text>取消</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:else class="empty">
+    <text class="empty-icon">📋</text>
+    <text class="empty-text">暂无申请记录</text>
+    <button class="empty-btn" bindtap="onGoApply">去预约教室</button>
+  </view>
+
+  <!-- 加载更多 -->
+  <view wx:if="{{hasMore}}" class="more">
+    <text class="more-btn" bindtap="loadMore">加载更多</text>
+  </view>
+</view>

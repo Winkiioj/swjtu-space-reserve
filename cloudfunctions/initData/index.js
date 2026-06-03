@@ -1,12 +1,11 @@
 /**
- * 初始化数据脚本 - 用于学期初快速导入教室、座位、课程数据
+ * 初始化数据脚本 - 清空并重建数据库
  * 功能：
- * - 1. 清空所有表（可选）
- * - 2. 导入讲次定义
- * - 3. 导入教室基础信息
- * - 4. 导入座位基础信息
- * - 5. 导入初始用户（至少一个管理员）
- * - 6. 导入课程表并填充教室状态矩阵
+ * - 始终清空所有表（避免重复数据）
+ * - 导入讲次定义、教室、座位、用户、课程
+ * - 更新教室状态矩阵
+ *
+ * 注意：微信云数据库单次删除上限1000条，本函数会循环删除直到清空
  */
 
 const cloud = require('wx-server-sdk')
@@ -16,10 +15,10 @@ cloud.init({
 })
 const db = cloud.database()
 const _ = db.command
+const MAX_BATCH_DELETE = 1000 // 云数据库单次删除上限
 
 // ============ 常量定义 ============
 
-// 讲次定义 - 13讲
 const LECTURES = [
     { lecture_no: 1, start_time: '08:00', end_time: '08:45' },
     { lecture_no: 2, start_time: '08:55', end_time: '09:40' },
@@ -36,391 +35,191 @@ const LECTURES = [
     { lecture_no: 13, start_time: '21:10', end_time: '21:55' }
 ]
 
-// 初始空矩阵模板
 const EMPTY_WEEK_MATRIX = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // 周一
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // 周二
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // 周三
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], // 周四
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]  // 周五
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ]
 
 const EMPTY_DAY_MATRIX = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-// 示例教室数据
 const CLASSROOMS_DATA = [
-    {
-        buildingBelong: '一号教学楼',
-        classroomID: 'x1337',
-        containNumber: 90,
-        description: '多媒体教室，配备投影仪',
-        floor: 3
-    },
-    {
-        buildingBelong: '一号教学楼',
-        classroomID: 'x1338',
-        containNumber: 80,
-        description: '标准教室',
-        floor: 3
-    },
-    {
-        buildingBelong: '二号教学楼',
-        classroomID: 'x2101',
-        containNumber: 120,
-        description: '阶梯教室，配备音响',
-        floor: 1
-    },
-    {
-        buildingBelong: '二号教学楼',
-        classroomID: 'x2102',
-        containNumber: 60,
-        description: '小型研讨室',
-        floor: 1
-    }
+    { buildingBelong: '一号教学楼', classroomID: 'x1337', containNumber: 90, description: '多媒体教室，配备投影仪', floor: 3 },
+    { buildingBelong: '一号教学楼', classroomID: 'x1338', containNumber: 80, description: '标准教室', floor: 3 },
+    { buildingBelong: '二号教学楼', classroomID: 'x2101', containNumber: 120, description: '阶梯教室，配备音响', floor: 1 },
+    { buildingBelong: '二号教学楼', classroomID: 'x2102', containNumber: 60, description: '小型研讨室', floor: 1 }
 ]
 
-// 示例座位数据（图书馆）
 const SEATS_DATA = [
-    {
-        areaBelong: '2A',
-        seatID: '2A001',
-        seatType: 'standard',
-        floor: 2
-    },
-    {
-        areaBelong: '2A',
-        seatID: '2A002',
-        seatType: 'standard',
-        floor: 2
-    },
-    {
-        areaBelong: '2B',
-        seatID: '2B001',
-        seatType: 'vip',
-        floor: 2
-    },
-    {
-        areaBelong: '3A',
-        seatID: '3A001',
-        seatType: 'study',
-        floor: 3
-    }
+    { areaBelong: '2A', seatID: '2A001', seatType: 'standard', floor: 2 },
+    { areaBelong: '2A', seatID: '2A002', seatType: 'standard', floor: 2 },
+    { areaBelong: '2B', seatID: '2B001', seatType: 'vip', floor: 2 },
+    { areaBelong: '3A', seatID: '3A001', seatType: 'study', floor: 3 }
 ]
 
-// 示例课程数据
 const COURSES_DATA = [
     {
-        courseID: 'CS101',
-        courseName: '数据结构',
-        classroom: 'x1337',
-        instructorName: '李教授',
-        schedule: {
-            dayOfWeek: 0,      // 周一
-            startLecture: 0,   // 第1讲
-            endLecture: 2      // 第3讲
-        }
+        courseID: 'CS101', courseName: '数据结构', classroom: 'x1337', instructorName: '李教授',
+        schedule: { dayOfWeek: 0, startLecture: 0, endLecture: 2 }
     },
     {
-        courseID: 'CS102',
-        courseName: '算法设计',
-        classroom: 'x1338',
-        instructorName: '张教授',
-        schedule: {
-            dayOfWeek: 1,      // 周二
-            startLecture: 1,   // 第2讲
-            endLecture: 3      // 第4讲
-        }
+        courseID: 'CS102', courseName: '算法设计', classroom: 'x1338', instructorName: '张教授',
+        schedule: { dayOfWeek: 1, startLecture: 1, endLecture: 3 }
     },
     {
-        courseID: 'CS103',
-        courseName: '数据库',
-        classroom: 'x2101',
-        instructorName: '王教授',
-        schedule: {
-            dayOfWeek: 2,      // 周三
-            startLecture: 2,   // 第3讲
-            endLecture: 4      // 第5讲
-        }
+        courseID: 'CS103', courseName: '数据库', classroom: 'x2101', instructorName: '王教授',
+        schedule: { dayOfWeek: 2, startLecture: 2, endLecture: 4 }
     }
 ]
 
-// 示例用户数据
 const USERS_DATA = [
-    {
-        identity: 'admin',
-        userID: 'admin001',
-        userName: '系统管理员',
-        department: '教务处',
-        phone: '13800000001',
-        isBlacklisted: false
-    },
-    {
-        identity: 'teacher',
-        userID: '202001',
-        userName: '李教授',
-        department: '计算机学院',
-        phone: '13800000002',
-        isBlacklisted: false
-    },
-    {
-        identity: 'student',
-        userID: '2023112593',
-        userName: '王凯',
-        department: '软件学院',
-        phone: '13800138000',
-        isBlacklisted: false
-    }
+    { identity: 'admin', userID: 'admin001', userName: '系统管理员', department: '教务处', phone: '13800000001', isBlacklisted: false, openid: 'dev_openid_admin001' },
+    { identity: 'teacher', userID: '202001', userName: '李教授', department: '计算机学院', phone: '13800000002', isBlacklisted: false, openid: 'dev_openid_202001' },
+    { identity: 'student', userID: '2023112593', userName: '王凯', department: '软件学院', phone: '13800138000', isBlacklisted: false, openid: 'dev_openid_2023112593' }
 ]
 
 // ============ 工具函数 ============
 
-/**
- * 深拷贝多维数组
- */
-function deepCopyMatrix(matrix) {
-    return JSON.parse(JSON.stringify(matrix))
-}
+function getCurrentTimestamp() { return Date.now() }
+
+function deepCopyMatrix(m) { return JSON.parse(JSON.stringify(m)) }
 
 /**
- * 生成讲次空矩阵
+ * 循环清空集合（突破1000条上限）
  */
-function generateEmptyMatrix(rows = 5, cols = 13) {
-    return Array(rows)
-        .fill(null)
-        .map(() => Array(cols).fill(0))
+async function clearCollection(name) {
+    let totalDeleted = 0
+    while (true) {
+        const { data } = await db.collection(name)
+            .where({})
+            .limit(MAX_BATCH_DELETE)
+            .get()
+        if (data.length === 0) break
+        const ids = data.map(d => d._id)
+        await db.collection(name)
+            .where({ _id: _.in(ids) })
+            .remove()
+        totalDeleted += ids.length
+        console.log(`已删除 ${name} 表 ${totalDeleted} 条`)
+    }
+    return totalDeleted
 }
 
-/**
- * 生成当前时间戳
- */
-function getCurrentTimestamp() {
-    return new Date().getTime()
-}
-
-/**
- * 创建教室文档
- */
-function createClassroomDoc(classroom) {
+function createClassroomDoc(c) {
     return {
-        buildingBelong: classroom.buildingBelong,
-        classroomID: classroom.classroomID,
-        containNumber: classroom.containNumber,
-        description: classroom.description,
-        floor: classroom.floor || 1,
+        buildingBelong: c.buildingBelong, classroomID: c.classroomID,
+        containNumber: c.containNumber, description: c.description, floor: c.floor || 1,
         thisWeekStatusMatrix: deepCopyMatrix(EMPTY_WEEK_MATRIX),
         nextWeekStatusMatrix: deepCopyMatrix(EMPTY_WEEK_MATRIX),
-        createdAt: getCurrentTimestamp(),
-        updatedAt: getCurrentTimestamp()
+        createdAt: getCurrentTimestamp(), updatedAt: getCurrentTimestamp()
     }
 }
 
-/**
- * 创建座位文档
- */
-function createSeatDoc(seat) {
+function createSeatDoc(s) {
     return {
-        areaBelong: seat.areaBelong,
-        seatID: seat.seatID,
-        seatType: seat.seatType,
-        floor: seat.floor || 2,
+        areaBelong: s.areaBelong, seatID: s.seatID, seatType: s.seatType, floor: s.floor || 2,
         thisDayStatusMatrix: deepCopyMatrix(EMPTY_DAY_MATRIX),
         nextDayStatusMatrix: deepCopyMatrix(EMPTY_DAY_MATRIX),
-        createdAt: getCurrentTimestamp(),
-        updatedAt: getCurrentTimestamp()
+        createdAt: getCurrentTimestamp(), updatedAt: getCurrentTimestamp()
     }
 }
 
-/**
- * 创建用户文档
- */
-function createUserDoc(user) {
+function createUserDoc(u) {
     return {
-        identity: user.identity,
-        userID: user.userID,
-        userName: user.userName,
-        department: user.department || '',
-        phone: user.phone || '',
-        isBlacklisted: user.isBlacklisted || false,
-        totalRentals: 0,
-        createdAt: getCurrentTimestamp(),
-        updatedAt: getCurrentTimestamp()
+        identity: u.identity, userID: u.userID, userName: u.userName,
+        department: u.department || '', phone: u.phone || '',
+        openid: u.openid || '',
+        isBlacklisted: u.isBlacklisted || false, totalRentals: 0,
+        createdAt: getCurrentTimestamp(), updatedAt: getCurrentTimestamp()
     }
 }
 
-/**
- * 创建课程文档
- */
-function createCourseDoc(course) {
+function createCourseDoc(c) {
     return {
-        courseID: course.courseID,
-        courseName: course.courseName,
-        classroom: course.classroom,
-        instructorName: course.instructorName,
-        schedule: course.schedule,
+        courseID: c.courseID, courseName: c.courseName, classroom: c.classroom,
+        instructorName: c.instructorName, schedule: c.schedule,
         createdAt: getCurrentTimestamp()
     }
 }
 
-// ============ 主要初始化流程 ============
+// ============ 主流程 ============
 
 exports.main = async (event, context) => {
     try {
-        console.log('========== 开始数据库初始化 ==========')
+        console.log('========== 数据库初始化开始 ==========')
 
-        let stats = {
-            lecturesAdded: 0,
-            classroomsAdded: 0,
-            seatsAdded: 0,
-            usersAdded: 0,
-            coursesAdded: 0,
-            successfulUpdates: 0,
-            failedUpdates: 0
+        const tables = ['Lectures', 'Classrooms', 'Seats', 'Users', 'Courses', 'Applications']
+        let cleared = {}
+        for (const t of tables) {
+            cleared[t] = await clearCollection(t)
+        }
+        console.log('✓ 数据库已全部清空')
+
+        // 导入讲次
+        let added = { lectures: 0, classrooms: 0, seats: 0, users: 0, courses: 0 }
+        for (const l of LECTURES) {
+            await db.collection('Lectures').add({ data: { lecture_no: l.lecture_no, start_time: l.start_time, end_time: l.end_time, createdAt: getCurrentTimestamp() } })
+            added.lectures++
         }
 
-        // ===== 步骤1：清空所有表（可选）=====
-        if (event.clearDatabase) {
-            console.log('清空数据库中...')
-            try {
-                await db.collection('Lectures').where({}).remove()
-                await db.collection('Classrooms').where({}).remove()
-                await db.collection('Seats').where({}).remove()
-                await db.collection('Users').where({}).remove()
-                await db.collection('Courses').where({}).remove()
-                await db.collection('Applications').where({}).remove()
-                console.log('✓ 数据库已清空')
-            } catch (err) {
-                console.warn('清空数据库出错（可能是首次初始化）:', err.message)
+        // 导入教室
+        const classroomIds = {}
+        for (const c of CLASSROOMS_DATA) {
+            const doc = await db.collection('Classrooms').add({ data: createClassroomDoc(c) })
+            classroomIds[c.classroomID] = doc.id
+            added.classrooms++
+        }
+
+        // 导入座位
+        for (const s of SEATS_DATA) {
+            await db.collection('Seats').add({ data: createSeatDoc(s) })
+            added.seats++
+        }
+
+        // 导入用户
+        for (const u of USERS_DATA) {
+            await db.collection('Users').add({ data: createUserDoc(u) })
+            added.users++
+        }
+
+        // 导入课程
+        const matrices = {}
+        for (const c of COURSES_DATA) {
+            await db.collection('Courses').add({ data: createCourseDoc(c) })
+            added.courses++
+            if (!matrices[c.classroom]) matrices[c.classroom] = deepCopyMatrix(EMPTY_WEEK_MATRIX)
+            for (let i = c.schedule.startLecture; i <= c.schedule.endLecture; i++) {
+                matrices[c.classroom][c.schedule.dayOfWeek][i] = 1
             }
         }
 
-        // ===== 步骤2：导入讲次定义 =====
-        console.log('\n正在导入讲次定义...')
-        for (const lecture of LECTURES) {
-            await db.collection('Lectures').add({
-                data: {
-                    lecture_no: lecture.lecture_no,
-                    start_time: lecture.start_time,
-                    end_time: lecture.end_time,
-                    createdAt: getCurrentTimestamp()
-                }
+        // 更新教室矩阵
+        let updated = 0, failed = 0
+        for (const [cid, matrix] of Object.entries(matrices)) {
+            const docId = classroomIds[cid]
+            if (!docId) { failed++; continue }
+            await db.collection('Classrooms').doc(docId).update({
+                data: { thisWeekStatusMatrix: matrix, updatedAt: getCurrentTimestamp() }
             })
-            stats.lecturesAdded++
-        }
-        console.log(`✓ 已导入 ${stats.lecturesAdded} 条讲次定义`)
-
-        // ===== 步骤3：导入教室基础信息 =====
-        console.log('\n正在导入教室信息...')
-        const classroomIds = {} // 用于映射教室名称到ID
-        for (const classroom of CLASSROOMS_DATA) {
-            const docId = await db.collection('Classrooms').add({
-                data: createClassroomDoc(classroom)
-            })
-            classroomIds[classroom.classroomID] = docId.id
-            stats.classroomsAdded++
-        }
-        console.log(`✓ 已导入 ${stats.classroomsAdded} 间教室`)
-
-        // ===== 步骤4：导入座位信息 =====
-        console.log('\n正在导入座位信息...')
-        for (const seat of SEATS_DATA) {
-            await db.collection('Seats').add({
-                data: createSeatDoc(seat)
-            })
-            stats.seatsAdded++
-        }
-        console.log(`✓ 已导入 ${stats.seatsAdded} 个座位`)
-
-        // ===== 步骤5：导入用户信息 =====
-        console.log('\n正在导入用户信息...')
-        for (const user of USERS_DATA) {
-            await db.collection('Users').add({
-                data: createUserDoc(user)
-            })
-            stats.usersAdded++
-        }
-        console.log(`✓ 已导入 ${stats.usersAdded} 个用户`)
-
-        // ===== 步骤6：导入课程表 =====
-        console.log('\n正在导入课程表...')
-        const classroomMatrices = {} // 临时存储教室的矩阵
-
-        // 首先导入所有课程
-        for (const course of COURSES_DATA) {
-            await db.collection('Courses').add({
-                data: createCourseDoc(course)
-            })
-            stats.coursesAdded++
-
-            // 初始化该教室的矩阵副本（如果还没初始化）
-            if (!classroomMatrices[course.classroom]) {
-                classroomMatrices[course.classroom] = deepCopyMatrix(EMPTY_WEEK_MATRIX)
-            }
-
-            // 更新矩阵：将对应讲次设置为1（有课）
-            const schedule = course.schedule
-            for (let lecture = schedule.startLecture; lecture <= schedule.endLecture; lecture++) {
-                classroomMatrices[course.classroom][schedule.dayOfWeek][lecture] = 1
-            }
-        }
-        console.log(`✓ 已导入 ${stats.coursesAdded} 个课程`)
-
-        // ===== 步骤7：根据课程表更新教室状态矩阵 =====
-        console.log('\n正在更新教室状态矩阵...')
-        for (const classroomID in classroomMatrices) {
-            const docId = classroomIds[classroomID]
-            if (!docId) {
-                console.warn(`⚠️ 教室 ${classroomID} 未找到，跳过状态矩阵更新`)
-                stats.failedUpdates++
-                continue
-            }
-
-            try {
-                await db.collection('Classrooms').doc(docId).update({
-                    data: {
-                        thisWeekStatusMatrix: classroomMatrices[classroomID],
-                        updatedAt: getCurrentTimestamp()
-                    }
-                })
-                stats.successfulUpdates++
-                console.log(`✓ 已更新教室 ${classroomID} 的状态矩阵`)
-            } catch (err) {
-                console.error(`✗ 更新教室 ${classroomID} 失败:`, err.message)
-                stats.failedUpdates++
-            }
+            updated++
         }
 
-        // ===== 返回初始化结果 =====
-        console.log('\n========== 初始化完成 ==========')
-        const result = {
-            success: true,
-            code: 0,
-            message: '数据初始化成功',
+        const summary = {
+            code: 0, message: '数据库初始化成功',
             data: {
-                timestamp: getCurrentTimestamp(),
-                stats: stats,
-                summary: `
-          成功导入：
-          - ${stats.lecturesAdded} 条讲次
-          - ${stats.classroomsAdded} 间教室
-          - ${stats.seatsAdded} 个座位
-          - ${stats.usersAdded} 个用户
-          - ${stats.coursesAdded} 个课程
-          教室矩阵更新：${stats.successfulUpdates} 成功, ${stats.failedUpdates} 失败
-        `
+                cleared,
+                added,
+                matrixUpdated: { updated, failed },
+                timestamp: getCurrentTimestamp()
             }
         }
+        console.log('========== 初始化完成 ==========')
+        return summary
 
-        console.log(result.data.summary)
-        return result
     } catch (error) {
-        console.error('========== 数据初始化失败 ==========')
-        console.error('错误信息:', error.message)
-        console.error('错误堆栈:', error.stack)
-        return {
-            success: false,
-            code: 500,
-            message: '数据初始化失败',
-            error: error.message
-        }
+        console.error('初始化失败:', error)
+        return { code: 500, message: '数据库初始化失败', error: error.message }
     }
 }

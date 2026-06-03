@@ -15,10 +15,21 @@ const _ = db.command
 
 /**
  * 获取用户信息（包含黑名单状态）
+ * 支持通过 userID(学号) 或 openid(微信) 查找
  */
 async function getUserInfo(userID) {
-    const result = await db.collection('Users')
+    // 先按 userID 查找
+    let result = await db.collection('Users')
         .where({ userID: userID })
+        .get()
+
+    if (result.data.length > 0) {
+        return result.data[0]
+    }
+
+    // 再按 openid 查找
+    result = await db.collection('Users')
+        .where({ openid: userID })
         .get()
 
     return result.data.length > 0 ? result.data[0] : null
@@ -182,6 +193,8 @@ exports.main = async (event, context) => {
         const now = new Date().getTime()
         const applicationData = {
             classroomApplied: classroom._id,
+            classroomName: classroom.classroomID,       // 冗余：教室号，如 "x1337"
+            classroomBuilding: classroom.buildingBelong, // 冗余：楼栋，如 "一号教学楼"
             proposerID: userID,
             proposerName: user.userName,
 

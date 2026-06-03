@@ -13,7 +13,7 @@ const _ = db.command
 
 exports.main = async (event, context) => {
     try {
-        const { rentDate, rentWeek, rentDayOfWeek, rentLectures, minCapacity = 0 } = event
+        const { rentDate, rentWeek, rentDayOfWeek, rentLectures, minCapacity = 0, building } = event
 
         // ===== 参数校验 =====
         if (!rentDate || !rentWeek || rentDayOfWeek === undefined || !rentLectures || rentLectures.length === 0) {
@@ -51,11 +51,17 @@ exports.main = async (event, context) => {
             }
         }
 
-        // ===== 查询所有符合容量的教室 =====
+        // ===== 构建查询条件 =====
+        let queryCondition = { containNumber: _.gte(minCapacity) }
+
+        // 如果指定了楼栋，按楼栋筛选
+        if (building && building !== '') {
+            queryCondition.buildingBelong = building
+        }
+
+        // ===== 查询符合容量和楼栋条件的教室 =====
         const classrooms = await db.collection('Classrooms')
-            .where({
-                containNumber: _.gte(minCapacity)
-            })
+            .where(queryCondition)
             .get()
 
         if (classrooms.data.length === 0) {
@@ -88,6 +94,8 @@ exports.main = async (event, context) => {
                     _id: classroom._id,
                     classroomID: classroom.classroomID,
                     buildingBelong: classroom.buildingBelong,
+                    building: classroom.buildingBelong,  // 前端兼容别名
+                    roomNumber: classroom.classroomID,    // 前端兼容别名
                     floor: classroom.floor,
                     containNumber: classroom.containNumber,
                     description: classroom.description,

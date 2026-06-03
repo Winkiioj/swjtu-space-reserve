@@ -1,0 +1,80 @@
+<view class="page">
+  <!-- 用户信息卡片 -->
+  <view class="user-card" wx:if="{{isLoggedIn}}">
+    <image wx:if="{{avatar}}" class="avatar" src="{{avatar}}" mode="aspectFill" />
+    <text wx:else class="avatar-place">👤</text>
+    <view class="user-body">
+      <text class="name">{{nickName || '用户'}}</text>
+      <text class="uid" wx:if="{{isBound}}">{{userID}} · {{identityText}}</text>
+      <text class="uid warn" wx:else>未绑定学号</text>
+    </view>
+    <view class="bind-btn" wx:if="{{!isBound}}" bindtap="onBind">去绑定</view>
+  </view>
+
+  <!-- 未登录卡片 -->
+  <view class="user-card" wx:else>
+    <text class="avatar-place">🏫</text>
+    <view class="user-body">
+      <text class="name">未登录</text>
+      <text class="uid">登录后使用全部功能</text>
+    </view>
+    <view class="bind-btn" bindtap="onLogin">登录</view>
+  </view>
+
+  <!-- 统计数据 -->
+  <view class="stats" wx:if="{{isLoggedIn}}">
+    <view class="stat">
+      <text class="num">{{stats.total}}</text>
+      <text class="label">总申请</text>
+    </view>
+    <view class="stat">
+      <text class="num green">{{stats.approved}}</text>
+      <text class="label">已通过</text>
+    </view>
+    <view class="stat">
+      <text class="num yellow">{{stats.pending}}</text>
+      <text class="label">待审核</text>
+    </view>
+    <view class="stat">
+      <text class="num red">{{stats.rejected}}</text>
+      <text class="label">已拒绝</text>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu">
+    <view class="menu-item" bindtap="onMenu" data-key="applications">
+      <text class="mi-icon">📋</text>
+      <text class="mi-text">我的申请</text>
+      <text class="mi-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="onMenu" data-key="favorites">
+      <text class="mi-icon">⭐</text>
+      <text class="mi-text">收藏教室</text>
+      <text class="mi-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="menu">
+    <view class="menu-item" bindtap="onMenu" data-key="help">
+      <text class="mi-icon">❓</text>
+      <text class="mi-text">帮助中心</text>
+      <text class="mi-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="onMenu" data-key="about">
+      <text class="mi-icon">ℹ️</text>
+      <text class="mi-text">关于我们</text>
+      <text class="mi-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="menu" wx:if="{{isLoggedIn}}">
+    <view class="menu-item logout" bindtap="onLogout">
+      <text class="mi-icon">🚪</text>
+      <text class="mi-text">退出登录</text>
+    </view>
+  </view>
+
+  <text class="version">v1.0.0</text>
+</view>

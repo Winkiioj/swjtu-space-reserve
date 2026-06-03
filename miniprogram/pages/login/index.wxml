@@ -1,0 +1,56 @@
+<view class="page">
+  <!-- Logo 区域 -->
+  <view class="logo-area">
+    <view class="logo-circle">🏫</view>
+    <text class="app-name">交大空间预约</text>
+    <text class="app-sub">教室租借 · 图书馆座位</text>
+  </view>
+
+  <!-- 登录表单区域 -->
+  <view class="login-box">
+    <!-- 头像选择 -->
+    <view class="avatar-section">
+      <button
+        class="avatar-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="onChooseAvatar"
+      >
+        <image
+          class="avatar-img"
+          src="{{avatarUrl}}"
+          mode="aspectFill"
+          wx:if="{{avatarUrl}}"
+        />
+        <view class="avatar-placeholder" wx:else>
+          <text class="avatar-icon">📷</text>
+          <text class="avatar-hint">点击选择头像</text>
+        </view>
+      </button>
+    </view>
+
+    <!-- 昵称输入 -->
+    <view class="nickname-section">
+      <input
+        class="nickname-input"
+        type="nickname"
+        placeholder="请输入昵称"
+        value="{{nickName}}"
+        bindinput="onNicknameInput"
+        bindblur="onNicknameBlur"
+        maxlength="20"
+      />
+    </view>
+
+    <!-- 登录按钮 -->
+    <button
+      class="login-btn {{canLogin ? 'login-btn--active' : ''}}"
+      bindtap="onLogin"
+      loading="{{loading}}"
+      disabled="{{!canLogin || loading}}"
+    >
+      <text>微信一键登录</text>
+    </button>
+
+    <text class="hint">登录即表示同意《用户协议》和《隐私政策》</text>
+  </view>
+</view>
