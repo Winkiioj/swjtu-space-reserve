@@ -1,0 +1,58 @@
+<view class="page">
+  <!-- 头部信息 -->
+  <view class="head">
+    <text class="head-name">{{classroom.buildingBelong}} {{classroom.classroomID}}</text>
+    <view class="head-meta">
+      <text class="meta-item">🏫 {{classroom.buildingBelong}}</text>
+      <text class="meta-item">👥 {{classroom.containNumber}} 人</text>
+      <text wx:if="{{classroom.floor}}" class="meta-item">📍 {{classroom.floor}} 楼</text>
+    </view>
+    <text class="head-desc" wx:if="{{classroom.description}}">{{classroom.description}}</text>
+  </view>
+
+  <!-- 周切换 -->
+  <view class="seg">
+    <view class="seg-item {{currentWeek === 'this' ? 'on' : ''}}" bindtap="onWeekChange" data-week="this">本周</view>
+    <view class="seg-item {{currentWeek === 'next' ? 'on' : ''}}" bindtap="onWeekChange" data-week="next">下周</view>
+  </view>
+
+  <!-- 状态矩阵图例 -->
+  <view class="legend">
+    <view class="leg-item"><view class="leg-dot free"></view><text>空闲</text></view>
+    <view class="leg-item"><view class="leg-dot course"></view><text>有课</text></view>
+    <view class="leg-item"><view class="leg-dot taken"></view><text>已预约</text></view>
+  </view>
+
+  <!-- 状态矩阵 -->
+  <view class="matrix">
+    <view class="mat-header">
+      <view class="mat-time-hd"></view>
+      <view class="mat-day-hd" wx:for="{{['周一','周二','周三','周四','周五']}}" wx:key="*this">{{item}}</view>
+    </view>
+    <scroll-view scroll-y class="mat-body">
+      <view class="mat-row" wx:for="{{lectures}}" wx:key="index" wx:for-item="lec">
+        <view class="mat-time">
+          <text class="mat-t-label">{{lec.label}}</text>
+          <text class="mat-t-time">{{lec.time}}</text>
+        </view>
+        <view
+          wx:for="{{[0,1,2,3,4]}}"
+          wx:key="*this"
+          wx:for-item="dayIdx"
+          class="mat-cell s{{statusMatrix[dayIdx] ? statusMatrix[dayIdx][lec.index] : -1}}"
+        >
+          <text wx:if="{{statusMatrix[dayIdx] && statusMatrix[dayIdx][lec.index] === 1}}">课</text>
+          <text wx:elif="{{statusMatrix[dayIdx] && statusMatrix[dayIdx][lec.index] === 2}}">占</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="foot">
+    <button class="btn-fav {{isFavorite ? 'on' : ''}}" bindtap="onFavorite">
+      {{isFavorite ? '★ 已收藏' : '☆ 收藏'}}
+    </button>
+    <button class="btn-do" bindtap="onApply">立即预约</button>
+  </view>
+</view>

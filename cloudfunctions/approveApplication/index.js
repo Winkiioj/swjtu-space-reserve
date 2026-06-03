@@ -21,8 +21,11 @@ async function getApplicationInfo(applicationID) {
         const result = await db.collection('Applications')
             .doc(applicationID)
             .get()
-
-        return result.data.length > 0 ? result.data[0] : null
+        // .doc() 返回单对象 {data: {...}}，不是数组
+        if (result && result.data && result.data._id) {
+            return result.data
+        }
+        return null
     } catch (err) {
         console.error('获取申请详情失败:', err)
         return null
@@ -37,8 +40,11 @@ async function getClassroomInfo(classroomID) {
         const result = await db.collection('Classrooms')
             .doc(classroomID)
             .get()
-
-        return result.data.length > 0 ? result.data[0] : null
+        // .doc() 返回单对象 {data: {...}}
+        if (result && result.data && result.data._id) {
+            return result.data
+        }
+        return null
     } catch (err) {
         console.error('获取教室信息失败:', err)
         return null
@@ -78,16 +84,18 @@ function updateMatrixToOccupied(matrix, dayOfWeek, lectures) {
 
 exports.main = async (event, context) => {
     try {
-        const { applicationID, approverID } = event
+        const { applicationId, approverID } = event
 
         // ===== 参数校验 =====
-        if (!applicationID || !approverID) {
+        if (!applicationId || !approverID) {
             return {
                 code: 400,
                 message: '参数缺失',
                 data: null
             }
         }
+
+        const applicationID = applicationId  // 统一变量名
 
         // ===== 验证审批人是否为管理员 =====
         // 这里可以根据实际需要添加权限检查
