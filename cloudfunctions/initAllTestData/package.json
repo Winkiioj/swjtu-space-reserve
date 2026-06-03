@@ -1,9 +1,0 @@
-{
-  "name": "initAllTestData",
-  "version": "1.0.0",
-  "description": "一键初始化全量测试数据，清空旧数据并重建",
-  "main": "index.js",
-  "dependencies": {
-    "wx-server-sdk": "latest"
-  }
-}
