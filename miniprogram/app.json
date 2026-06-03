@@ -51,6 +51,5 @@
     ]
   },
   "sitemapLocation": "sitemap.json",
-  "style": "v2",
-  "lazyCodeLoading": "requiredComponents"
+  "style": "v2"
 }
