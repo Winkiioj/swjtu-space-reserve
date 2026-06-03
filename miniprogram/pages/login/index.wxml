@@ -1,6 +1,6 @@
 <view class="page">
-  <!-- Logo 区域 -->
-  <view class="logo-area">
+  <!-- Logo 区域 — 连点 3 次进入管理员登录 -->
+  <view class="logo-area" bindtap="onLogoTap">
     <view class="logo-circle">🏫</view>
     <text class="app-name">交大空间预约</text>
     <text class="app-sub">教室租借 · 图书馆座位</text>

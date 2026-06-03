@@ -18,7 +18,9 @@ Page({
     avatarUrl: '',
     nickName: '',
     canLogin: false,
-    loading: false
+    loading: false,
+    _adminTapCount: 0,
+    _adminTapTimer: null
   },
 
   onLoad() {
@@ -62,6 +64,23 @@ Page({
       this.setData({ nickName: v })
       this.checkCanLogin()
     }
+  },
+
+  /**
+   * Logo 连点 3 次 → 跳转管理员登录（隐蔽入口）
+   */
+  onLogoTap() {
+    if (this.data._adminTapTimer) clearTimeout(this.data._adminTapTimer)
+    const count = this.data._adminTapCount + 1
+    if (count >= 3) {
+      this.setData({ _adminTapCount: 0, _adminTapTimer: null })
+      wx.navigateTo({ url: '/pages/manager-login/manager-login' })
+      return
+    }
+    this.setData({ _adminTapCount: count })
+    this.data._adminTapTimer = setTimeout(() => {
+      this.setData({ _adminTapCount: 0, _adminTapTimer: null })
+    }, 2000)
   },
 
   /**
