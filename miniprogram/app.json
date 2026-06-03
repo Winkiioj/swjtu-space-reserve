@@ -1,9 +1,5 @@
 {
   "pages": [
-    "pages/manager-login/manager-login",
-    "pages/seat/seat",
-    "pages/seat-result/seat-result",
-    "pages/my-reservations/my-reservations",
     "pages/index/index",
     "pages/apply/index",
     "pages/mine/index",
@@ -11,6 +7,10 @@
     "pages/classroom/index",
     "pages/application/index",
     "pages/bind-student/index",
+    "pages/seat/seat",
+    "pages/seat-result/seat-result",
+    "pages/my-reservations/my-reservations",
+    "pages/manager-login/manager-login",
     "pages/admin/dashboard/dashboard",
     "pages/admin/review-list/review-list",
     "pages/admin/review-detail/review-detail",
