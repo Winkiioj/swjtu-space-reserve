@@ -92,17 +92,28 @@ Page({
         nickName: this.data.nickName.trim()
       }
 
-      // 3. 开发环境可用缓存的 openid 模拟
-      const accountInfo = wx.getAccountInfoSync()
-      const isDev = accountInfo.miniProgram.envVersion === 'develop'
+      // 3. 云函数登录
       const params = { code, userInfo }
-      if (isDev) {
-        const saved = wx.getStorageSync('_devOpenid')
-        if (saved) params.devOpenid = saved
-      }
+      let result
 
-      // 4. 调用云函数登录
-      const result = await api.user.wechatLogin(params)
+      try {
+        result = await api.user.wechatLogin(params)
+      } catch (cloudErr) {
+        // 开发环境：云函数未部署时用 mock 数据绕过登录
+        const accountInfo = wx.getAccountInfoSync()
+        const isDev = accountInfo.miniProgram.envVersion === 'develop'
+        if (isDev) {
+          console.warn('[DEV] 云函数未部署，使用 mock 登录模拟')
+          result = {
+            openid: 'dev_mock_openid_' + Date.now(),
+            avatarUrl: userInfo.avatarUrl,
+            nickName: userInfo.nickName,
+            isBound: false
+          }
+        } else {
+          throw cloudErr
+        }
+      }
 
       if (result) {
         // 缓存 openid 用于开发环境
