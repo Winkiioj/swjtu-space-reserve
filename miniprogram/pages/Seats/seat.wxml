@@ -1,0 +1,32 @@
+<!-- miniprogram/pages/seat/seat.wxml -->
+<view class="container">
+  <view class="section">
+    <text>预约日期</text>
+    <radio-group bindchange="onDateChange">
+      <label><radio value="this" checked/> 今天（{{todayDate}}）</label>
+      <label><radio value="next"/> 明天（{{tomorrowDate}}）</label>
+    </radio-group>
+  </view>
+
+  <view class="section">
+    <text>选择讲次（可多选）</text>
+    <view class="lecture-grid">
+      <label wx:for="{{lectures}}" wx:key="index">
+        <checkbox value="{{item.index}}" bindchange="onLectureChange"/>
+        {{item.time}} (第{{item.index+1}}讲)
+      </label>
+    </view>
+  </view>
+
+  <button type="primary" bindtap="searchSeats">查询空闲座位</button>
+
+  <view class="seat-list" wx:if="{{seats.length > 0}}">
+    <block wx:for="{{seats}}" wx:key="_id">
+      <view class="seat-card" bindtap="reserveSeat" data-seat="{{item}}">
+        <text>{{item.seatID}} ({{item.areaBelong}})</text>
+        <text>类型：{{item.seatType}}</text>
+      </view>
+    </block>
+  </view>
+  <view wx:else class="empty-tip">暂无空闲座位</view>
+</view>
