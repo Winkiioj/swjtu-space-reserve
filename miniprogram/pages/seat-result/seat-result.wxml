@@ -81,13 +81,13 @@
         <view class="wall-side wall-left"></view>
         <view class="room-grid">
           <view wx:for="{{mapSeats}}" wx:key="_id"
-                class="room-seat {{item.isAvailable ? 'seat-free' : 'seat-occ'}}"
+                class="room-seat {{item.isAvailable ? 'seat-free' : 'seat-occ'}} {{selectedSeatId === item._id ? 'seat-picked' : ''}}"
                 data-seat="{{item}}"
-                bindtap="{{item.isAvailable ? 'reserveSeat' : ''}}">
+                bindtap="reserveSeat">
             <view class="seat-block">
-              <text class="seat-block-num">{{item.seatID.slice(-2)}}号</text>
+              <text class="seat-block-num">{{item.seatID}}号</text>
             </view>
-            <text class="seat-block-status">{{item.isAvailable ? '空闲' : '已占'}}</text>
+            <text class="seat-block-status">{{item.isAvailable ? (selectedSeatId === item._id ? '已选中' : '空闲') : '已占'}}</text>
           </view>
         </view>
         <view class="wall-side wall-right"></view>

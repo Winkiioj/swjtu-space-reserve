@@ -102,6 +102,6 @@ Page({
       return
     }
 
-    wx.navigateTo({ url: '/pages/apply/index' })
+    wx.switchTab({ url: '/pages/apply/index' })
   }
 })

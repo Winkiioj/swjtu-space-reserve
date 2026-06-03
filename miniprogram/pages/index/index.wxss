@@ -30,18 +30,24 @@
 .banner-link { font-size: 24rpx; color: #ad6800; font-weight: 600; flex-shrink: 0; }
 
 /* 核心入口 */
-.grid { display: flex; margin: 0 24rpx 24rpx; }
+.grid { display: flex; margin: 0 24rpx 24rpx; gap: 16rpx; }
 .grid-item {
   flex: 1; display: flex; flex-direction: column; align-items: center;
-  padding: 36rpx 0; background: #fff; border-radius: 16rpx;
-  margin: 0 8rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  padding: 32rpx 20rpx 24rpx; background: #fff; border-radius: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.05);
   transition: transform 0.15s;
 }
-.grid-item:first-child { margin-left: 0; }
-.grid-item:last-child { margin-right: 0; }
 .grid-item:active { transform: scale(0.97); }
-.grid-icon { font-size: 52rpx; margin-bottom: 14rpx; }
-.grid-label { font-size: 26rpx; color: #333; font-weight: 500; }
+.grid-icon { font-size: 56rpx; margin-bottom: 10rpx; }
+.grid-label { font-size: 28rpx; color: #1a1a1a; font-weight: 600; margin-bottom: 4rpx; }
+.grid-desc { font-size: 22rpx; color: #999; margin-bottom: 16rpx; }
+.grid-btn {
+  padding: 10rpx 40rpx; border-radius: 32rpx;
+  background: #e6f4ff; color: #1677ff; font-size: 24rpx; font-weight: 500;
+}
+.seat-card .grid-btn {
+  background: #e8f8ee; color: #07c160;
+}
 
 /* 使用指南 */
 .section {
@@ -49,18 +55,40 @@
   background: #fff; border-radius: 16rpx;
   box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.03);
 }
-.sec-title { font-size: 28rpx; font-weight: 600; color: #1a1a1a; display: block; margin-bottom: 20rpx; }
+.sec-title { font-size: 28rpx; font-weight: 600; color: #1a1a1a; display: block; margin-bottom: 16rpx; }
 
-.steps { display: flex; flex-direction: column; }
-.step { display: flex; align-items: flex-start; padding: 12rpx 0; }
-.step-num {
-  width: 40rpx; height: 40rpx; border-radius: 50%;
-  background: #e6f4ff; color: #1677ff; font-size: 22rpx; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; margin-right: 20rpx;
+/* 双栏布局 */
+.guide-cols { display: flex; gap: 16rpx; }
+.guide-col {
+  flex: 1; min-width: 0;
+  background: #fafbfc; border-radius: 14rpx;
+  overflow: hidden;
 }
-.step-text { flex: 1; }
-.step-title { font-size: 26rpx; font-weight: 600; color: #333; display: block; }
-.step-desc { font-size: 22rpx; color: #8c8c8c; display: block; margin-top: 4rpx; }
+
+/* 栏头 */
+.guide-col-head {
+  display: flex; align-items: center; gap: 8rpx;
+  padding: 14rpx 18rpx;
+}
+.classroom-head { background: #e6f4ff; }
+.seat-head { background: #e8f8ee; }
+.guide-col-icon { font-size: 26rpx; }
+.guide-col-title { font-size: 24rpx; font-weight: 600; }
+.classroom-head .guide-col-title { color: #1677ff; }
+.seat-head .guide-col-title { color: #07c160; }
+
+/* 步骤列表 */
+.guide-steps { padding: 10rpx 18rpx 14rpx; display: flex; flex-direction: column; }
+.g-step { display: flex; align-items: flex-start; padding: 10rpx 0; }
+.g-step-num {
+  width: 32rpx; height: 32rpx; border-radius: 50%;
+  background: #e6f4ff; color: #1677ff; font-size: 20rpx; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-right: 12rpx; margin-top: 2rpx;
+}
+.g-step-num.seat-num { background: #e8f8ee; color: #07c160; }
+.g-step-text { flex: 1; min-width: 0; }
+.g-step-title { font-size: 24rpx; font-weight: 600; color: #333; display: block; }
+.g-step-desc { font-size: 20rpx; color: #8c8c8c; display: block; margin-top: 2rpx; }
 
 .footer { text-align: center; font-size: 22rpx; color: #c0c0c0; padding: 16rpx 0; }

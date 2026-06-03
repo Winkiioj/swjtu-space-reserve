@@ -6,6 +6,8 @@ const LECTURE_LABELS = [
   '第13讲 (21:10-21:55)'
 ]
 
+const auth = require('../../utils/auth')
+
 Page({
   data: {
     reservations: [],
@@ -13,6 +15,10 @@ Page({
   },
 
   onShow() {
+    if (!auth.isLoggedIn()) {
+      wx.reLaunch({ url: '/pages/login/index' })
+      return
+    }
     this.loadReservations()
   },
 
