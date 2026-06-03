@@ -1,0 +1,55 @@
+@import '../../../styles/admin-theme.wxss';
+
+.stats-grid {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 40rpx;
+}
+
+.stat-card {
+  flex: 1;
+  background: var(--adm-card-bg);
+  border-radius: var(--adm-radius-md);
+  padding: 30rpx 0;
+  text-align: center;
+  box-shadow: var(--adm-shadow);
+}
+
+.stat-num {
+  display: block;
+  font-size: 48rpx;
+  font-weight: 700;
+  color: var(--adm-primary);
+}
+
+.stat-label {
+  display: block;
+  font-size: 24rpx;
+  color: var(--adm-text-secondary);
+  margin-top: 10rpx;
+}
+
+.quick-menu {
+  display: flex;
+  gap: 24rpx;
+}
+
+.menu-item {
+  flex: 1;
+  background: var(--adm-card-bg);
+  border-radius: var(--adm-radius-md);
+  padding: 36rpx 0;
+  text-align: center;
+  box-shadow: var(--adm-shadow);
+}
+
+.menu-icon {
+  display: block;
+  font-size: 64rpx;
+  margin-bottom: 16rpx;
+}
+
+.menu-text {
+  font-size: 28rpx;
+  color: var(--adm-text-primary);
+}

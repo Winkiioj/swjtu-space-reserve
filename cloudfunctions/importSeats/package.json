@@ -1,5 +1,5 @@
 {
-  "name": "getApplicationDetail",
+  "name": "importSeats",
   "version": "1.0.0",
   "dependencies": {
     "wx-server-sdk": "latest"

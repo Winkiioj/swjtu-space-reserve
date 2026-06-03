@@ -1,0 +1,39 @@
+<view class="adm-page">
+  <block wx:for="{{applications}}" wx:key="_id">
+    <view class="adm-card" bindtap="goDetail" data-id="{{item._id}}" style="padding: 0;">
+      <!-- 卡片头部 -->
+      <view class="card-header">
+        <text style="font-size: 30rpx; font-weight: 600; color: var(--adm-text-primary);">{{item.userName}}</text>
+        <text wx:if="{{type === 'reviewed'}}" class="adm-badge {{item.rentalStatus === 1 ? 'adm-badge-approved' : 'adm-badge-rejected'}}">{{item.statusText}}</text>
+        <text wx:else class="adm-badge adm-badge-pending">待审核</text>
+      </view>
+      <!-- 卡片内容 -->
+      <view style="padding: 20rpx 30rpx 30rpx;">
+        <view class="adm-info-row">
+          <text class="adm-info-label">教室</text>
+          <text class="adm-info-value">{{item.classroomName}}</text>
+        </view>
+        <view class="adm-info-row">
+          <text class="adm-info-label">日期</text>
+          <text class="adm-info-value">{{item.rentDate}} 周{{item.rentDayOfWeek + 1}}</text>
+        </view>
+        <view class="adm-info-row">
+          <text class="adm-info-label">讲次</text>
+          <text class="adm-info-value">{{item.rentLecturesStr}}</text>
+        </view>
+        <view class="adm-info-row" style="border-bottom: none;">
+          <text class="adm-info-label">事由</text>
+          <text class="adm-info-value">{{item.rentalDetail}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 加载更多 -->
+  <view wx:if="{{loading}}" class="adm-loading">加载中...</view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{applications.length === 0 && !loading}}" class="adm-empty">
+    <text style="color: var(--adm-text-muted);">{{type === 'reviewed' ? '暂无已审核记录' : '暂无待审核申请'}}</text>
+  </view>
+</view>

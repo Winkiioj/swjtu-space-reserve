@@ -1,59 +1,74 @@
-/**
- * getApplicationDetail - 获取申请详情
- */
-
 const cloud = require('wx-server-sdk')
-
 cloud.init()
 const db = cloud.database()
+const _ = db.command
+const { success, fail } = require('./response')
+const { requireAdmin } = require('./auth')
 
-exports.main = async (event, context) => {
-    try {
-        const { applicationId } = event
+exports.main = async (event) => {
+  const { applicationId, currentUserID } = event
+  if (!applicationId || !currentUserID) return fail(400, '参数缺失')
 
-        if (!applicationId) {
-            return {
-                code: 400,
-                message: '申请ID不能为空',
-                data: null
-            }
+  try {
+    await requireAdmin(db, currentUserID)
+
+    const appRes = await db.collection('Applications').doc(applicationId).get()
+    if (!appRes.data) return fail(404, '申请不存在')
+    const application = appRes.data
+
+    const userRes = await db.collection('Users').where({ userID: application.proposerID }).get()
+    const proposer = userRes.data[0] || {}
+
+    const classRes = await db.collection('Classrooms').doc(application.classroomApplied).get()
+    const classroom = classRes.data
+    if (!classroom) return fail(404, '教室不存在')
+
+    const lecturesStr = application.rentLectures.map(l => l + 1).join(',') + '讲'
+
+    // 查找替代教室：容量≥原教室，同一周次相同时段空闲
+    const matrixKey = application.rentWeek === 'this'
+      ? 'thisWeekStatusMatrix'
+      : 'nextWeekStatusMatrix'
+    const dayOfWeek = application.rentDayOfWeek
+    const lectures = application.rentLectures
+
+    const allRooms = await db.collection('Classrooms')
+      .where({ containNumber: _.gte(classroom.containNumber) })
+      .get()
+
+    const alternatives = []
+    for (let room of allRooms.data) {
+      if (room._id === classroom._id) continue
+      let conflict = false
+      for (let lec of lectures) {
+        if (room[matrixKey][dayOfWeek][lec] !== 0) {
+          conflict = true
+          break
         }
-
-        const result = await db.collection('Applications')
-            .doc(applicationId)
-            .get()
-
-        if (!result.data) {
-            return {
-                code: 404,
-                message: '申请不存在',
-                data: null
-            }
-        }
-
-        // 获取教室信息
-        let classroom = null
-        if (result.data.classroomApplied) {
-            const classResult = await db.collection('Classrooms')
-                .doc(result.data.classroomApplied)
-                .get()
-            classroom = classResult.data
-        }
-
-        return {
-            code: 0,
-            message: '查询成功',
-            data: {
-                ...result.data,
-                classroomInfo: classroom
-            }
-        }
-    } catch (error) {
-        console.error('getApplicationDetail 错误:', error)
-        return {
-            code: 500,
-            message: '查询失败',
-            error: error.message
-        }
+      }
+      if (!conflict) {
+        alternatives.push({
+          _id: room._id,
+          buildingBelong: room.buildingBelong,
+          classroomID: room.classroomID,
+          containNumber: room.containNumber
+        })
+      }
     }
+
+    // 按容量升序排列（最接近原教室的排前面）
+    alternatives.sort((a, b) => a.containNumber - b.containNumber)
+
+    return success({
+      application,
+      applicantPhone: proposer.phone || '',
+      classroomInfo: classroom,
+      lecturesStr,
+      alternatives: alternatives.slice(0, 5)
+    })
+  } catch (err) {
+    if (err.code && err.message) return err
+    console.error(err)
+    return fail(500, '获取失败', err.message)
+  }
 }

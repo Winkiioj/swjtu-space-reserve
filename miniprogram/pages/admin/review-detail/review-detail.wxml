@@ -1,0 +1,69 @@
+<view class="adm-page">
+  <!-- 申请信息 -->
+  <view class="adm-card">
+    <view class="adm-section-title">申请信息</view>
+
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请人</text>
+      <text class="adm-info-value">{{application.userName}} ({{application.proposerID}})</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">联系电话</text>
+      <text class="adm-info-value">{{applicantPhone}}</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请教室</text>
+      <text class="adm-info-value">{{classroomInfo.buildingBelong}} {{classroomInfo.classroomID}}</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">教室容量</text>
+      <text class="adm-info-value">{{classroomInfo.containNumber}} 人</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请日期</text>
+      <text class="adm-info-value">{{application.rentDate}} 周{{application.rentDayOfWeek + 1}}</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请讲次</text>
+      <text class="adm-info-value">{{lecturesStr}}</text>
+    </view>
+    <view wx:if="{{isReviewed}}" class="adm-info-row">
+      <text class="adm-info-label">审核状态</text>
+      <text class="adm-info-value"><text class="adm-badge {{application.rentalStatus === 1 ? 'adm-badge-approved' : 'adm-badge-rejected'}}">{{statusText}}</text></text>
+    </view>
+    <view wx:if="{{application.rentalStatus === 2}}" class="adm-info-row" style="border-bottom: none;">
+      <text class="adm-info-label">拒绝原因</text>
+      <text class="adm-info-value">{{application.rejectionReason}}</text>
+    </view>
+    <view wx:if="{{application.rentalStatus !== 2}}" class="adm-info-row" style="border-bottom: none;">
+      <text class="adm-info-label">事由</text>
+      <text class="adm-info-value">{{application.rentalDetail}}</text>
+    </view>
+  </view>
+
+  <!-- 替代教室（只读展示，未审核时才显示） -->
+  <view wx:if="{{!isReviewed}}" class="adm-card">
+    <view class="adm-section-title">推荐替代教室</view>
+    <view wx:for="{{alternatives}}" wx:key="index" class="alt-item">
+      <view class="alt-info">
+        <text class="alt-name">{{item.buildingBelong}} {{item.classroomID}}</text>
+        <text class="alt-capacity">容量 {{item.containNumber}} 人</text>
+      </view>
+    </view>
+    <view wx:if="{{alternatives.length === 0}}" class="adm-empty" style="padding: 30rpx 0;">
+      <text>暂无其他可用教室</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-buttons">
+    <block wx:if="{{!isReviewed}}">
+      <view class="adm-btn adm-btn-primary {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'approve'}}">通过申请</view>
+      <view wx:if="{{alternatives.length > 0}}" class="adm-btn adm-btn-warning {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'rejectWithRecommend'}}">拒绝并推荐替代教室</view>
+      <view class="adm-btn adm-btn-danger {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'reject'}}">拒绝申请</view>
+    </block>
+    <block wx:else>
+      <view class="adm-btn adm-btn-warning {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'revoke'}}">撤销审核</view>
+    </block>
+  </view>
+</view>

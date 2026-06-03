@@ -1,12 +1,17 @@
 {
   "pages": [
+    "pages/manager-login/manager-login",
     "pages/index/index",
     "pages/apply/index",
     "pages/mine/index",
     "pages/login/index",
     "pages/classroom/index",
     "pages/application/index",
-    "pages/bind-student/index"
+    "pages/bind-student/index",
+    "pages/admin/dashboard/dashboard",
+    "pages/admin/review-list/review-list",
+    "pages/admin/review-detail/review-detail",
+    "pages/admin/init-data/init-data"
   ],
   "window": {
     "backgroundColor": "#f5f5f5",

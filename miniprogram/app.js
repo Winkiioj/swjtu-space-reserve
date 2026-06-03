@@ -1,5 +1,6 @@
 /**
  * 小程序入口文件
+ * 整合学生端与管理员端功能
  */
 const auth = require('./utils/auth')
 
@@ -8,6 +9,8 @@ App({
     env: "cloud1-d0gbgetcn91021db4",
     userInfo: null,
     isLoggedIn: false,
+    currentUserID: null,   // 当前登录用户的 userID（管理员模块使用）
+    userRole: null,        // 'admin' | 'student' | 'teacher'（管理员模块使用）
     _loginChecked: false,
     appVersion: '1.0.0',
     systemInfo: null,
@@ -60,7 +63,7 @@ App({
     if (!auth.isLoggedIn()) {
       const pages = getCurrentPages()
       const currentPage = pages[pages.length - 1]
-      if (!currentPage || currentPage.route !== 'pages/login/index') {
+      if (!currentPage || (currentPage.route !== 'pages/login/index' && currentPage.route !== 'pages/manager-login/manager-login')) {
         wx.reLaunch({ url: '/pages/login/index' })
       }
     }

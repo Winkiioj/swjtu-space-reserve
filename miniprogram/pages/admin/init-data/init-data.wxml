@@ -1,0 +1,136 @@
+<view class="adm-page">
+  <!-- ===== 教室导入表单 ===== -->
+  <view class="adm-card">
+    <view class="adm-section-title">📚 导入教室数据</view>
+    <text style="font-size: 26rpx; color: var(--adm-text-secondary); display: block; margin-bottom: 32rpx;">
+      使用下拉框选择教学楼、楼层和编号范围，批量生成教室。
+    </text>
+
+    <!-- 教学楼 -->
+    <view class="form-row">
+      <text class="form-label">教学楼</text>
+      <picker mode="selector" range="{{buildings}}" value="{{selectedBuildingIndex}}" bindchange="onBuildingChange">
+        <view class="form-picker">
+          <text>{{buildings[selectedBuildingIndex]}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 楼层 -->
+    <view class="form-row">
+      <text class="form-label">楼层</text>
+      <picker mode="selector" range="{{floors}}" value="{{selectedFloorIndex}}" bindchange="onFloorChange">
+        <view class="form-picker">
+          <text>{{floors[selectedFloorIndex]}} 楼</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 编号范围 -->
+    <view class="form-row">
+      <text class="form-label">编号范围</text>
+      <view class="form-range">
+        <input class="range-input" type="number" value="{{roomStart}}" bindinput="onRoomStartInput" maxlength="2" placeholder="01" />
+        <text style="color: var(--adm-text-muted); margin: 0 12rpx;">至</text>
+        <input class="range-input" type="number" value="{{roomEnd}}" bindinput="onRoomEndInput" maxlength="2" placeholder="05" />
+      </view>
+    </view>
+
+    <!-- 容量 -->
+    <view class="form-row">
+      <text class="form-label">容量</text>
+      <picker mode="selector" range="{{capacityOptions}}" value="{{selectedCapacityIndex}}" bindchange="onCapacityChange">
+        <view class="form-picker">
+          <text>{{capacityOptions[selectedCapacityIndex]}} 人</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 描述 -->
+    <view class="form-row" style="border-bottom: none;">
+      <text class="form-label">描述</text>
+      <input class="form-input" type="text" value="{{description}}" bindinput="onDescInput" placeholder="如：多媒体教室" />
+    </view>
+
+    <!-- 生成按钮 -->
+    <view class="form-actions">
+      <view class="btn-generate" hover-class="btn-generate-active" bindtap="generateClassrooms">添加教室批次</view>
+      <view class="btn-generate" hover-class="btn-generate-active" style="margin-top: 16rpx; background: var(--adm-text-secondary);" bindtap="showClassroomImport">JSON导入教室</view>
+    </view>
+  </view>
+
+  <!-- ===== 待导入列表 ===== -->
+  <view wx:if="{{classroomList.length}}" class="adm-card">
+    <view style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20rpx;">
+      <text style="font-size: 28rpx; font-weight: 600; color: var(--adm-text-primary);">待导入教室（{{classroomList.length}} 间）</text>
+      <text style="font-size: 24rpx; color: var(--adm-danger);" bindtap="clearList">清空</text>
+    </view>
+
+    <scroll-view scroll-y style="max-height: 400rpx;">
+      <view class="preview-item" wx:for="{{classroomList}}" wx:for-index="i" wx:key="index">
+        <view class="preview-info">
+          <text class="preview-building">{{item.buildingBelong}}</text>
+          <text class="preview-room">{{item.classroomID}}</text>
+          <text class="preview-capacity">{{item.containNumber}}人</text>
+        </view>
+        <text class="preview-remove" bindtap="removeItem" data-index="{{i}}">✕</text>
+      </view>
+    </scroll-view>
+
+    <view class="adm-btn adm-btn-primary {{importing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{importing ? '' : 'doImport'}}" style="margin-top: 20rpx;">
+      {{importing ? '导入中...' : '确认导入 ' + classroomList.length + ' 间教室'}}
+    </view>
+  </view>
+
+  <!-- ===== 教室 JSON 粘贴弹框 ===== -->
+  <view wx:if="{{showClassroomModal}}" class="modal-overlay" catchtouchmove="noop">
+    <view class="modal-content">
+      <text class="modal-title">粘贴教室 JSON</text>
+      <scroll-view scroll-y class="modal-scroll">
+        <textarea class="modal-textarea" value="{{classroomJson}}" bindinput="onClassroomJsonInput" placeholder='[{"buildingBelong":"一号教学楼","classroomID":"x1101","containNumber":90,"description":"多媒体教室"}]' maxlength="-1" />
+      </scroll-view>
+      <view class="modal-actions">
+        <view class="adm-btn adm-btn-outline" hover-class="adm-btn-active" bindtap="closeClassroomModal" style="flex:1;">取消</view>
+        <view class="adm-btn adm-btn-primary {{importing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{importing ? '' : 'submitClassroomImport'}}" style="flex:1; margin-left: 20rpx;">
+          {{importing ? '导入中...' : '确认导入'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 课表导入（入口保留） ===== -->
+  <view class="adm-card">
+    <view class="adm-section-title">📖 导入课表数据</view>
+    <text style="font-size: 26rpx; color: var(--adm-text-secondary); display: block; margin-bottom: 24rpx;">
+      粘贴课表 JSON 数据，系统将自动标记教室占用讲次。
+    </text>
+    <view class="adm-btn adm-btn-outline" hover-class="adm-btn-active" bindtap="showCourseImport">导入课表</view>
+  </view>
+
+  <!-- ===== 课表 JSON 粘贴弹框 ===== -->
+  <view wx:if="{{showCourseModal}}" class="modal-overlay" catchtouchmove="noop">
+    <view class="modal-content">
+      <text class="modal-title">粘贴课表 JSON</text>
+      <scroll-view scroll-y class="modal-scroll">
+        <textarea class="modal-textarea" value="{{courseJson}}" bindinput="onCourseJsonInput" placeholder='[{"classroomID":"x2101","courseID":"CS101","courseName":"高等数学","schedule":{"dayOfWeek":0,"startLecture":0,"endLecture":2}}]' maxlength="-1" />
+      </scroll-view>
+      <view class="modal-actions">
+        <view class="adm-btn adm-btn-outline" hover-class="adm-btn-active" bindtap="closeCourseModal" style="flex:1;">取消</view>
+        <view class="adm-btn adm-btn-primary {{importingCourses ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{importingCourses ? '' : 'submitCourseImport'}}" style="flex:1; margin-left: 20rpx;">
+          {{importingCourses ? '导入中...' : '确认导入'}}
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 导入日志 ===== -->
+  <view wx:if="{{logs.length}}" class="adm-card">
+    <text style="font-size: 28rpx; font-weight: 600; color: var(--adm-text-primary); display: block; margin-bottom: 16rpx;">操作记录</text>
+    <view wx:for="{{logs}}" wx:for-index="i" wx:key="i">
+      <text style="font-size: 24rpx; color: var(--adm-success); line-height: 1.8; display: block;">{{item}}</text>
+    </view>
+  </view>
+</view>

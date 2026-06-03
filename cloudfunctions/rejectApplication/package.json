@@ -1,9 +1,7 @@
 {
   "name": "rejectApplication",
   "version": "1.0.0",
-  "description": "拒绝申请",
-  "main": "index.js",
   "dependencies": {
-    "wx-server-sdk": "~2.6.3"
+    "wx-server-sdk": "latest"
   }
 }
