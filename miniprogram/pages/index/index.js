@@ -17,10 +17,7 @@ Page({
   },
 
   onLoad() {
-    if (!auth.isLoggedIn()) {
-      wx.reLaunch({ url: '/pages/login/index' })
-      return
-    }
+    // 不再在此处 reLaunch —— app.js onLaunch 已统一处理登录守卫
     this.loadInfo()
   },
   onShow() { this.loadInfo() },
@@ -47,10 +44,18 @@ Page({
   },
 
   onUserTap() {
+    if (!auth.isLoggedIn()) {
+      wx.reLaunch({ url: '/pages/login/index' })
+      return
+    }
     wx.switchTab({ url: '/pages/mine/index' })
   },
 
   onFunc(e) {
+    if (!auth.isLoggedIn()) {
+      wx.reLaunch({ url: '/pages/login/index' })
+      return
+    }
     const type = e.currentTarget.dataset.type
     if (type === 'classroom' && !this.data.isBound) {
       wx.showModal({

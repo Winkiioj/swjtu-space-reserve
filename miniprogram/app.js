@@ -9,9 +9,9 @@ App({
     env: "cloud1-d0gbgetcn91021db4",
     userInfo: null,
     isLoggedIn: false,
-    currentUserID: null,   // 当前登录用户的 userID（管理员模块使用）
-    userRole: null,        // 'admin' | 'student' | 'teacher'（管理员模块使用）
-    _loginChecked: false,
+    currentUserID: null,
+    userRole: null,
+    _launched: false,    // 标记 onLaunch 是否已处理过守卫
     appVersion: '1.0.0',
     systemInfo: null,
     config: {
@@ -49,24 +49,25 @@ App({
   onLaunch() {
     this.initCloud()
     this.getSystemInfo()
+
+    // 首次启动登录守卫：直接在 onLaunch 中处理，避免各页面 onLoad 重复 reLaunch
+    if (!auth.isLoggedIn()) {
+      wx.reLaunch({ url: '/pages/login/index' })
+    }
   },
 
   onShow() {
-    // 全局登录守卫：每次小程序切回前台时检查
-    // 未登录且当前不在登录页 → 跳登录页
-    setTimeout(() => {
-      this.globalLoginGuard()
-    }, 100)
-  },
-
-  globalLoginGuard() {
-    if (!auth.isLoggedIn()) {
-      const pages = getCurrentPages()
-      const currentPage = pages[pages.length - 1]
-      if (!currentPage || (currentPage.route !== 'pages/login/index' && currentPage.route !== 'pages/manager-login/manager-login')) {
-        wx.reLaunch({ url: '/pages/login/index' })
+    // 从后台切回前台时的登录守卫（避免和 onLaunch 的守卫重复触发）
+    if (this.globalData._launched) {
+      if (!auth.isLoggedIn()) {
+        const pages = getCurrentPages()
+        const currentPage = pages[pages.length - 1]
+        if (!currentPage || (currentPage.route !== 'pages/login/index' && currentPage.route !== 'pages/manager-login/manager-login')) {
+          wx.reLaunch({ url: '/pages/login/index' })
+        }
       }
     }
+    this.globalData._launched = true
   },
 
   initCloud() {
