@@ -24,6 +24,8 @@ const TEST_USERS = [
   { userID: '2023112544', userName: '赵强', identity: 'student', department: '交通运输学院', phone: '13800138006' },
   { userID: '2023112533', userName: '孙丽', identity: 'student', department: '外国语学院', phone: '13800138007' },
   { userID: '2023112522', userName: '周杰', identity: 'student', department: '建筑学院', phone: '13800138008' },
+  { userID: '2023112419', userName: '张涛', identity: 'student', department: '软件学院', phone: '' },
+  { userID: '2023112425', userName: '潘星宇', identity: 'student', department: '软件学院', phone: '' },
   { userID: '12345',     userName: '管理员', identity: 'admin',   department: '教务处',     phone: '13900139000' }
 ]
 

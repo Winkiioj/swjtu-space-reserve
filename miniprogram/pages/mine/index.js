@@ -85,6 +85,8 @@ Page({
     const key = e.currentTarget.dataset.key
     if (key === 'applications') {
       wx.navigateTo({ url: '/pages/application/index' })
+    } else if (key === 'reservations') {
+      wx.navigateTo({ url: '/pages/my-reservations/my-reservations' })
     } else if (key === 'favorites') {
       wx.showToast({ title: '功能开发中', icon: 'none' })
     } else if (key === 'help') {

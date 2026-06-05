@@ -4,6 +4,7 @@ const AdminAPI = require('../../../utils/admin-api')
 Page({
   data: {
     application: null,
+    applicantName: '',
     applicantPhone: '',
     classroomInfo: null,
     lecturesStr: '',
@@ -26,7 +27,8 @@ Page({
       const statusMap = { 1: '已通过', 2: '已拒绝' }
       this.setData({
         application: app,
-        applicantPhone: d.applicantPhone,
+        applicantName: d.applicantName || app.proposerName || '',
+        applicantPhone: d.applicantPhone || '',
         classroomInfo: d.classroomInfo,
         lecturesStr: d.lecturesStr,
         alternatives: d.alternatives,

@@ -34,87 +34,89 @@
     </radio-group>
   </view>
 
-  <!-- 快捷选择时段 & 讲次选择 -->
+  <!-- 讲次选择 — 三组平铺，始终可见 -->
   <view class="section">
     <view class="section-header">
       <text class="section-icon">🕐</text>
       <text class="section-title">选择讲次</text>
-      <text class="section-tip">可多选</text>
+      <text class="section-tip">点击讲次选择或取消</text>
     </view>
 
-    <!-- 快捷选择按钮 -->
-    <view class="period-bar">
-      <view class="period-btn {{periodStates.morning ? 'period-active' : ''}}"
-            bindtap="togglePeriod" data-period="morning">
-        <text class="period-icon">🌅</text>
-        <text class="period-label">上午</text>
-        <text class="period-range">08:00-12:25</text>
+    <!-- 上午组 -->
+    <view class="period-group">
+      <view class="period-head morning-head">
+        <view class="period-head-left">
+          <text class="period-icon">🌅</text>
+          <text class="period-name">上午</text>
+          <text class="period-range">08:00 - 12:25</text>
+        </view>
+        <view class="period-head-right">
+          <text class="period-badge" wx:if="{{periodCounts.morning > 0}}">{{periodCounts.morning}}/5</text>
+          <view class="period-toggle {{periodStates.morning ? 'toggle-on' : ''}}"
+                bindtap="togglePeriod" data-period="morning">
+            全选
+          </view>
+        </view>
       </view>
-      <view class="period-btn {{periodStates.afternoon ? 'period-active' : ''}}"
-            bindtap="togglePeriod" data-period="afternoon">
-        <text class="period-icon">☀️</text>
-        <text class="period-label">下午</text>
-        <text class="period-range">14:00-18:15</text>
-      </view>
-      <view class="period-btn {{periodStates.evening ? 'period-active' : ''}}"
-            bindtap="togglePeriod" data-period="evening">
-        <text class="period-icon">🌙</text>
-        <text class="period-label">晚上</text>
-        <text class="period-range">19:30-21:55</text>
+      <view class="lecture-row">
+        <view wx:for="{{morningLectures}}" wx:key="index"
+              class="lec-chip {{item.isSelected ? 'morning-chip-on' : ''}}"
+              bindtap="onLectureChange" data-index="{{item.index}}">
+          <text class="chip-label">{{item.label}}</text>
+          <text class="chip-time">{{item.time}}</text>
+        </view>
       </view>
     </view>
 
-    <!-- 讲次分组（三组独立，JS 合并处理） -->
-    <view class="lecture-section">
-      <!-- 上午组 -->
-      <view class="lecture-group">
-        <view class="group-header">
-          <text class="group-title">🌅 上午</text>
-          <text class="group-range">08:00 - 12:25</text>
+    <!-- 下午组 -->
+    <view class="period-group">
+      <view class="period-head afternoon-head">
+        <view class="period-head-left">
+          <text class="period-icon">☀️</text>
+          <text class="period-name">下午</text>
+          <text class="period-range">14:00 - 18:15</text>
         </view>
-        <checkbox-group bindchange="onMorningChange">
-          <view class="lecture-grid">
-            <label wx:for="{{morningLectures}}" wx:key="index"
-                  class="lecture-item {{selectedLectures.indexOf(item.index) !== -1 ? 'lecture-checked' : ''}}">
-              <checkbox value="{{item.index}}" class="lecture-checkbox"/>
-              <text class="lecture-label">{{item.label}}</text>
-            </label>
+        <view class="period-head-right">
+          <text class="period-badge" wx:if="{{periodCounts.afternoon > 0}}">{{periodCounts.afternoon}}/5</text>
+          <view class="period-toggle {{periodStates.afternoon ? 'toggle-on' : ''}}"
+                bindtap="togglePeriod" data-period="afternoon">
+            全选
           </view>
-        </checkbox-group>
+        </view>
       </view>
-
-      <!-- 下午组 -->
-      <view class="lecture-group">
-        <view class="group-header">
-          <text class="group-title">☀️ 下午</text>
-          <text class="group-range">14:00 - 18:15</text>
+      <view class="lecture-row">
+        <view wx:for="{{afternoonLectures}}" wx:key="index"
+              class="lec-chip {{item.isSelected ? 'afternoon-chip-on' : ''}}"
+              bindtap="onLectureChange" data-index="{{item.index}}">
+          <text class="chip-label">{{item.label}}</text>
+          <text class="chip-time">{{item.time}}</text>
         </view>
-        <checkbox-group bindchange="onAfternoonChange">
-          <view class="lecture-grid">
-            <label wx:for="{{afternoonLectures}}" wx:key="index"
-                  class="lecture-item {{selectedLectures.indexOf(item.index) !== -1 ? 'lecture-checked' : ''}}">
-              <checkbox value="{{item.index}}" class="lecture-checkbox"/>
-              <text class="lecture-label">{{item.label}}</text>
-            </label>
-          </view>
-        </checkbox-group>
       </view>
+    </view>
 
-      <!-- 晚上组 -->
-      <view class="lecture-group">
-        <view class="group-header">
-          <text class="group-title">🌙 晚上</text>
-          <text class="group-range">19:30 - 21:55</text>
+    <!-- 晚上组 -->
+    <view class="period-group">
+      <view class="period-head evening-head">
+        <view class="period-head-left">
+          <text class="period-icon">🌙</text>
+          <text class="period-name">晚上</text>
+          <text class="period-range">19:30 - 21:55</text>
         </view>
-        <checkbox-group bindchange="onEveningChange">
-          <view class="lecture-grid">
-            <label wx:for="{{eveningLectures}}" wx:key="index"
-                  class="lecture-item {{selectedLectures.indexOf(item.index) !== -1 ? 'lecture-checked' : ''}}">
-              <checkbox value="{{item.index}}" class="lecture-checkbox"/>
-              <text class="lecture-label">{{item.label}}</text>
-            </label>
+        <view class="period-head-right">
+          <text class="period-badge" wx:if="{{periodCounts.evening > 0}}">{{periodCounts.evening}}/3</text>
+          <view class="period-toggle {{periodStates.evening ? 'toggle-on' : ''}}"
+                bindtap="togglePeriod" data-period="evening">
+            全选
           </view>
-        </checkbox-group>
+        </view>
+      </view>
+      <view class="lecture-row">
+        <view wx:for="{{eveningLectures}}" wx:key="index"
+              class="lec-chip {{item.isSelected ? 'evening-chip-on' : ''}}"
+              bindtap="onLectureChange" data-index="{{item.index}}">
+          <text class="chip-label">{{item.label}}</text>
+          <text class="chip-time">{{item.time}}</text>
+        </view>
       </view>
     </view>
 

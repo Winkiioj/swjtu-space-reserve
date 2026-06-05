@@ -115,12 +115,14 @@ Page({
       const params = { code, userInfo }
       let result
 
+      // 提前判断环境，供 catch 块和后续逻辑共用
+      const accountInfo = wx.getAccountInfoSync()
+      const isDev = accountInfo.miniProgram.envVersion === 'develop'
+
       try {
         result = await api.user.wechatLogin(params)
       } catch (cloudErr) {
         // 开发环境：云函数未部署时用 mock 数据绕过登录
-        const accountInfo = wx.getAccountInfoSync()
-        const isDev = accountInfo.miniProgram.envVersion === 'develop'
         if (isDev) {
           console.warn('[DEV] 云函数未部署，使用 mock 登录模拟')
           result = {

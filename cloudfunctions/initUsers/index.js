@@ -41,6 +41,24 @@ const TEST_USERS = [
         phone: '13800138000',
         openid: 'dev_openid_2023112593',
         isBlacklisted: false
+    },
+    {
+        identity: 'student',
+        userID: '2023112419',
+        userName: '张涛',
+        department: '软件学院',
+        phone: '',
+        openid: 'dev_openid_2023112419',
+        isBlacklisted: false
+    },
+    {
+        identity: 'student',
+        userID: '2023112425',
+        userName: '潘星宇',
+        department: '软件学院',
+        phone: '',
+        openid: 'dev_openid_2023112425',
+        isBlacklisted: false
     }
 ]
 

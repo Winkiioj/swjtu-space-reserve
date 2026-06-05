@@ -5,7 +5,7 @@
 
     <view class="adm-info-row">
       <text class="adm-info-label">申请人</text>
-      <text class="adm-info-value">{{application.userName}} ({{application.proposerID}})</text>
+      <text class="adm-info-value">{{applicantName}} ({{application.proposerID}})</text>
     </view>
     <view class="adm-info-row">
       <text class="adm-info-label">联系电话</text>
@@ -20,6 +20,10 @@
       <text class="adm-info-value">{{classroomInfo.containNumber}} 人</text>
     </view>
     <view class="adm-info-row">
+      <text class="adm-info-label">预计人数</text>
+      <text class="adm-info-value">{{application.expectedAttendeeCount}} 人</text>
+    </view>
+    <view class="adm-info-row">
       <text class="adm-info-label">申请日期</text>
       <text class="adm-info-value">{{application.rentDate}} 周{{application.rentDayOfWeek + 1}}</text>
     </view>
@@ -27,17 +31,21 @@
       <text class="adm-info-label">申请讲次</text>
       <text class="adm-info-value">{{lecturesStr}}</text>
     </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">使用事由</text>
+      <text class="adm-info-value">{{application.rentalDetail || '未填写'}}</text>
+    </view>
+    <view wx:if="{{application.rentalDescription}}" class="adm-info-row">
+      <text class="adm-info-label">补充说明</text>
+      <text class="adm-info-value">{{application.rentalDescription}}</text>
+    </view>
     <view wx:if="{{isReviewed}}" class="adm-info-row">
       <text class="adm-info-label">审核状态</text>
       <text class="adm-info-value"><text class="adm-badge {{application.rentalStatus === 1 ? 'adm-badge-approved' : 'adm-badge-rejected'}}">{{statusText}}</text></text>
     </view>
-    <view wx:if="{{application.rentalStatus === 2}}" class="adm-info-row" style="border-bottom: none;">
+    <view wx:if="{{application.rentalStatus === 2 && application.rejectionReason}}" class="adm-info-row">
       <text class="adm-info-label">拒绝原因</text>
       <text class="adm-info-value">{{application.rejectionReason}}</text>
-    </view>
-    <view wx:if="{{application.rentalStatus !== 2}}" class="adm-info-row" style="border-bottom: none;">
-      <text class="adm-info-label">事由</text>
-      <text class="adm-info-value">{{application.rentalDetail}}</text>
     </view>
   </view>
 

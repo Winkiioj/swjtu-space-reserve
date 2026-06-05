@@ -8,11 +8,17 @@ Page({
     nickName: '',
     userID: '',
     identityText: '',
-    steps: [
-      { num: 1, title: '登录授权', desc: '微信授权头像和昵称' },
-      { num: 2, title: '绑定学号', desc: '在我的页面绑定学号/工号' },
-      { num: 3, title: '选择教室', desc: '按时间和容量筛选可用教室' },
-      { num: 4, title: '提交申请', desc: '填写事由，等待管理员审核' }
+    classroomSteps: [
+      { num: 1, title: '选择时间', desc: '选择日期、讲次和人数' },
+      { num: 2, title: '筛选教室', desc: '按楼栋和容量查找空余教室' },
+      { num: 3, title: '提交申请', desc: '填写事由，等待管理员审核' },
+      { num: 4, title: '查看结果', desc: '在「我的申请」中跟踪进度' }
+    ],
+    seatSteps: [
+      { num: 1, title: '选择日期', desc: '选择今天或明天' },
+      { num: 2, title: '选择讲次', desc: '勾选上午/下午/晚上时段' },
+      { num: 3, title: '挑选座位', desc: '按楼层区域查看座位图' },
+      { num: 4, title: '确认预约', desc: '点击座位即可立即预约' }
     ]
   },
 
@@ -57,10 +63,10 @@ Page({
       return
     }
     const type = e.currentTarget.dataset.type
-    if (type === 'classroom' && !this.data.isBound) {
+    if (!this.data.isBound) {
       wx.showModal({
         title: '请先绑定学号',
-        content: '使用借教室功能前需要绑定学号或工号',
+        content: '使用此功能前需要绑定学号或工号',
         confirmText: '去绑定',
         cancelText: '取消',
         confirmColor: '#1677ff',
@@ -73,8 +79,8 @@ Page({
       })
       return
     }
-    if (type === 'classroom') wx.navigateTo({ url: '/pages/apply/index' })
-    else if (type === 'seat') wx.showToast({ title: '功能开发中', icon: 'none' })
+    if (type === 'classroom') wx.switchTab({ url: '/pages/apply/index' })
+    else if (type === 'seat') wx.switchTab({ url: '/pages/seat/seat' })
   },
 
   onBindBanner() {

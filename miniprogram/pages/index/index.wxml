@@ -13,31 +13,60 @@
 
   <!-- 未绑定引导 -->
   <view class="banner" wx:if="{{isLoggedIn && !isBound}}" bindtap="onBindBanner">
-    <text class="banner-text">绑定学号/工号后可使用借教室功能</text>
+    <text class="banner-text">绑定学号/工号后可使用全部功能</text>
     <text class="banner-link">去绑定 ›</text>
   </view>
 
-  <!-- 核心入口 -->
+  <!-- 核心入口 — 两大功能卡片 -->
   <view class="grid">
     <view class="grid-item" bindtap="onFunc" data-type="classroom">
       <view class="grid-icon">🏫</view>
-      <text class="grid-label">借教室</text>
+      <text class="grid-label">教室预约</text>
+      <text class="grid-desc">借用空余教室</text>
+      <view class="grid-btn">进入 ›</view>
     </view>
-    <view class="grid-item" bindtap="onFunc" data-type="seat">
+    <view class="grid-item seat-card" bindtap="onFunc" data-type="seat">
       <view class="grid-icon">💺</view>
       <text class="grid-label">图书馆座位</text>
+      <text class="grid-desc">预约自习座位</text>
+      <view class="grid-btn seat-btn">进入 ›</view>
     </view>
   </view>
 
   <!-- 使用指南 -->
   <view class="section">
     <text class="sec-title">使用指南</text>
-    <view class="steps">
-      <view class="step" wx:for="{{steps}}" wx:key="num">
-        <view class="step-num">{{item.num}}</view>
-        <view class="step-text">
-          <text class="step-title">{{item.title}}</text>
-          <text class="step-desc">{{item.desc}}</text>
+    <view class="guide-cols">
+      <!-- 教室预约流程 -->
+      <view class="guide-col">
+        <view class="guide-col-head classroom-head">
+          <text class="guide-col-icon">🏫</text>
+          <text class="guide-col-title">教室预约</text>
+        </view>
+        <view class="guide-steps">
+          <view class="g-step" wx:for="{{classroomSteps}}" wx:key="num">
+            <view class="g-step-num">{{item.num}}</view>
+            <view class="g-step-text">
+              <text class="g-step-title">{{item.title}}</text>
+              <text class="g-step-desc">{{item.desc}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <!-- 座位预约流程 -->
+      <view class="guide-col">
+        <view class="guide-col-head seat-head">
+          <text class="guide-col-icon">💺</text>
+          <text class="guide-col-title">座位预约</text>
+        </view>
+        <view class="guide-steps">
+          <view class="g-step" wx:for="{{seatSteps}}" wx:key="num">
+            <view class="g-step-num seat-num">{{item.num}}</view>
+            <view class="g-step-text">
+              <text class="g-step-title">{{item.title}}</text>
+              <text class="g-step-desc">{{item.desc}}</text>
+            </view>
+          </view>
         </view>
       </view>
     </view>

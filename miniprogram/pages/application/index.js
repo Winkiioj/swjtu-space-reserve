@@ -223,6 +223,6 @@ Page({
 
   // 去申请
   onGoApply: function () {
-    wx.navigateTo({ url: '/pages/apply/index' })
+    wx.switchTab({ url: '/pages/apply/index' })
   }
 })

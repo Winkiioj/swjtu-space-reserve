@@ -1,3 +1,5 @@
+const auth = require('../../utils/auth')
+
 Page({
   data: {
     dayType: '',
@@ -15,6 +17,7 @@ Page({
     mapSeats: [],
     showMap: false,
     mapAreaLabel: '',
+    selectedSeatId: '',    // 当前选中的座位 _id
     // 收藏
     favorites: [],
     isCurrentFav: false,
@@ -179,7 +182,8 @@ Page({
         this.setData({
           mapSeats: res.result.data,
           mapAreaLabel: areaBelong,
-          showMap: true
+          showMap: true,
+          selectedSeatId: ''
         })
       } else {
         wx.showToast({ title: res.result.message || '加载失败', icon: 'none' })
@@ -193,7 +197,11 @@ Page({
 
   reserveSeat(e) {
     const seat = e.currentTarget.dataset.seat
-    if (seat.isAvailable === false) return
+    if (!seat || seat.isAvailable === false) return
+
+    // 点击选中——高亮当前座位
+    this.setData({ selectedSeatId: seat._id })
+
     const lectures = this.data.selectedLectures
     wx.showModal({
       title: '确认预约',
@@ -213,6 +221,7 @@ Page({
             wx.hideLoading()
             if (result.result.code === 0) {
               wx.showToast({ title: '预约成功', icon: 'success' })
+              this.setData({ selectedSeatId: '' })
               if (this.data.showMap) {
                 this.loadAreaMap()
               } else {
@@ -226,6 +235,9 @@ Page({
             console.error(err)
             wx.showToast({ title: '预约失败', icon: 'none' })
           })
+        } else {
+          // 取消弹窗 → 清除选中
+          this.setData({ selectedSeatId: '' })
         }
       }
     })

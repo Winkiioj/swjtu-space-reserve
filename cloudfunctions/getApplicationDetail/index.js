@@ -17,7 +17,11 @@ exports.main = async (event) => {
     const application = appRes.data
 
     const userRes = await db.collection('Users').where({ userID: application.proposerID }).get()
-    const proposer = userRes.data[0] || {}
+    const proposer = userRes.data[0] || null
+    const applicantPhone = proposer ? (proposer.phone || '未填写') : '未填写'
+    const applicantName = (application.proposerName)
+      || (proposer ? proposer.userName : '')
+      || '未知'
 
     const classRes = await db.collection('Classrooms').doc(application.classroomApplied).get()
     const classroom = classRes.data
@@ -61,7 +65,8 @@ exports.main = async (event) => {
 
     return success({
       application,
-      applicantPhone: proposer.phone || '',
+      applicantName,
+      applicantPhone,
       classroomInfo: classroom,
       lecturesStr,
       alternatives: alternatives.slice(0, 5)

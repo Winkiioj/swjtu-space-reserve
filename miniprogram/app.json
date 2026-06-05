@@ -2,12 +2,12 @@
   "pages": [
     "pages/index/index",
     "pages/apply/index",
+    "pages/seat/seat",
     "pages/mine/index",
     "pages/login/index",
     "pages/classroom/index",
     "pages/application/index",
     "pages/bind-student/index",
-    "pages/seat/seat",
     "pages/seat-result/seat-result",
     "pages/my-reservations/my-reservations",
     "pages/manager-login/manager-login",
@@ -38,9 +38,15 @@
       },
       {
         "pagePath": "pages/apply/index",
-        "text": "预约",
+        "text": "教室",
         "iconPath": "images/tab/apply.png",
         "selectedIconPath": "images/tab/apply-active.png"
+      },
+      {
+        "pagePath": "pages/seat/seat",
+        "text": "座位",
+        "iconPath": "images/tab/seat.png",
+        "selectedIconPath": "images/tab/seat-active.png"
       },
       {
         "pagePath": "pages/mine/index",
