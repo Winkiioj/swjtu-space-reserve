@@ -34,9 +34,9 @@ exports.main = async (event) => {
 
     // 获取申请人姓名
     const proposerIDs = [...new Set(listResult.data.map(a => a.proposerID))]
-    const users = await db.collection('Users').where({ userID: _.in(proposerIDs) }).get()
+    const users = await db.collection('Users').where({ openid: _.in(proposerIDs) }).get()
     const userMap = {}
-    users.data.forEach(u => { userMap[u.userID] = u.userName })
+    users.data.forEach(u => { userMap[u.openid] = u.userName })
 
     // 获取教室名称
     const classroomIDs = [...new Set(listResult.data.map(a => a.classroomApplied))]

@@ -56,17 +56,17 @@ exports.main = async (event, context) => {
             }
         }
 
-        // ===== 构建查询条件 =====
-        let query = db.collection('Applications')
-            .where({ proposerID: userID })
+        // ===== 构建查询条件（合并为单次 where，避免链式覆盖）=====
+        const conditions = { proposerID: userID }
 
         // 如果指定了状态（不是-1），则按状态筛选
         if (status !== -1) {
-            query = query.where({ rentalStatus: status })
+            conditions.rentalStatus = status
         }
 
         // ===== 执行查询 =====
-        const result = await query
+        const result = await db.collection('Applications')
+            .where(conditions)
             .orderBy('appliedAt', 'desc')
             .skip(skip)
             .limit(limit)

@@ -16,7 +16,7 @@ exports.main = async (event) => {
     if (!appRes.data) return fail(404, '申请不存在')
     const application = appRes.data
 
-    const userRes = await db.collection('Users').where({ userID: application.proposerID }).get()
+    const userRes = await db.collection('Users').where({ openid: application.proposerID }).get()
     const proposer = userRes.data[0] || null
     const applicantPhone = proposer ? (proposer.phone || '未填写') : '未填写'
     const applicantName = (application.proposerName)
