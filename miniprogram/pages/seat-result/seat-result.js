@@ -227,6 +227,13 @@ Page({
               } else {
                 this.searchSeats()
               }
+            } else if (result.result.code === 409) {
+              // 冲突类错误（座位被占或用户已有预约），用弹窗展示详细信息
+              wx.showModal({
+                title: '预约失败',
+                content: result.result.message,
+                showCancel: false
+              })
             } else {
               wx.showToast({ title: result.result.message, icon: 'none' })
             }

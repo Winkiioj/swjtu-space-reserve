@@ -11,6 +11,27 @@ exports.main = async (event, context) => {
     const userId = wxContext.OPENID
 
     const transaction = await db.startTransaction()
+
+    // 1. 检查同一用户同一日期是否已有活跃预约（防止同一人多占座位）
+    const existingRes = await transaction.collection('Reservations')
+      .where({
+        userId: userId,
+        date: date,
+        status: 'active'
+      })
+      .get()
+    for (let existing of existingRes.data) {
+      const hasOverlap = lectures.some(lec => existing.lectures.includes(lec))
+      if (hasOverlap) {
+        await transaction.rollback()
+        return {
+          code: 409,
+          message: `您在该时段已有预约（座位 ${existing.seatID}，讲次 ${existing.lectures.map(l => l + 1).join(',')}）`
+        }
+      }
+    }
+
+    // 2. 检查目标座位是否已被占用
     const seatRes = await transaction.collection('Seats').doc(seatId).get()
     const seat = seatRes.data
     const currentMatrix = seat[matrixField]
