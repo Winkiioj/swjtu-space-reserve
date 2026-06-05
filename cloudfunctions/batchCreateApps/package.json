@@ -1,0 +1,9 @@
+{
+  "name": "batchCreateApps",
+  "version": "1.0.0",
+  "description": "批量创建测试申请 — 支持模板精确控制或 quick 快捷生成",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

@@ -8,10 +8,27 @@
  * 3. 头像 + 昵称 都填写后，登录按钮亮起
  * 4. 点击登录 → wx.login 获取 code → wechatLogin 云函数 → 保存登录态
  * 5. 登录成功 → reLaunch 到首页
+ *
+ * 开发环境：自动显示测试用户快捷选择，传入 devOpenid 模拟登录
  */
 
 const auth = require('../../utils/auth')
 const api = require('../../utils/api')
+
+// ===== 开发环境测试用户列表 =====
+const DEV_TEST_USERS = [
+  { label: '王凯 (学生)', value: 'dev_openid_2023112593' },
+  { label: '李华 (学生)', value: 'dev_openid_2023112588' },
+  { label: '张伟 (学生)', value: 'dev_openid_2023112577' },
+  { label: '陈明 (学生)', value: 'dev_openid_2023112566' },
+  { label: '刘芳 (学生)', value: 'dev_openid_2023112555' },
+  { label: '赵强 (学生)', value: 'dev_openid_2023112544' },
+  { label: '孙丽 (学生)', value: 'dev_openid_2023112533' },
+  { label: '周杰 (学生)', value: 'dev_openid_2023112522' },
+  { label: '张涛 (学生)', value: 'dev_openid_2023112419' },
+  { label: '潘星宇 (学生)', value: 'dev_openid_2023112425' },
+  { label: '管理员',       value: 'dev_openid_admin001' }
+]
 
 Page({
   data: {
@@ -20,10 +37,30 @@ Page({
     canLogin: false,
     loading: false,
     _adminTapCount: 0,
-    _adminTapTimer: null
+    _adminTapTimer: null,
+    // 开发环境
+    isDev: false,
+    selectedDevUser: -1,        // 选中的测试用户索引，-1 = 真实登录
+    devUsers: DEV_TEST_USERS
   },
 
   onLoad() {
+    // 检测开发环境
+    const accountInfo = wx.getAccountInfoSync()
+    const isDev = accountInfo.miniProgram.envVersion === 'develop'
+    this.setData({ isDev })
+
+    // 读取上次选的测试用户
+    if (isDev) {
+      const lastDevUser = wx.getStorageSync('_lastDevUserIndex')
+      if (lastDevUser !== undefined && lastDevUser !== '') {
+        const idx = parseInt(lastDevUser)
+        if (idx >= 0 && idx < DEV_TEST_USERS.length) {
+          this.setData({ selectedDevUser: idx })
+        }
+      }
+    }
+
     // 已登录不进登录页
     if (auth.isLoggedIn()) {
       wx.reLaunch({ url: '/pages/index/index' })
@@ -39,7 +76,6 @@ Page({
 
   /**
    * 选择头像（微信原生 chooseAvatar）
-   * 头像临时路径会由云函数在后续版本上传到云存储
    */
   onChooseAvatar(e) {
     const { avatarUrl } = e.detail
@@ -56,7 +92,7 @@ Page({
   },
 
   /**
-   * 昵称失焦（微信 type="nickname" 键盘收起时也会触发）
+   * 昵称失焦
    */
   onNicknameBlur(e) {
     const v = e.detail.value
@@ -84,10 +120,33 @@ Page({
   },
 
   /**
+   * 开发环境：选择测试用户
+   */
+  onSelectDevUser(e) {
+    const index = parseInt(e.currentTarget.dataset.index)
+    this.setData({ selectedDevUser: index })
+    wx.setStorageSync('_lastDevUserIndex', index)
+  },
+
+  /**
+   * 开发环境：切回真实登录
+   */
+  onUseRealLogin() {
+    this.setData({ selectedDevUser: -1 })
+    wx.removeStorageSync('_lastDevUserIndex')
+  },
+
+  /**
    * 检查是否可以登录
    */
   checkCanLogin() {
-    const canLogin = !!this.data.avatarUrl && !!this.data.nickName.trim()
+    const isDev = this.data.isDev
+    const hasAvatar = !!this.data.avatarUrl
+    const hasNick = !!this.data.nickName.trim()
+    const isDevUser = isDev && this.data.selectedDevUser >= 0
+
+    // 开发环境选了测试用户：头像昵称可省；真实登录或生产环境：必须填
+    const canLogin = isDevUser ? true : (hasAvatar && hasNick)
     if (this.data.canLogin !== canLogin) {
       this.setData({ canLogin })
     }
@@ -99,45 +158,74 @@ Page({
   async onLogin() {
     if (!this.data.canLogin || this.data.loading) return
 
+    const isDev = this.data.isDev
+    const selectedDevUser = this.data.selectedDevUser
+
     this.setData({ loading: true })
 
     try {
-      // 1. 获取微信登录 code
-      const code = await auth.getLoginCode()
-
-      // 2. 构造用户信息
-      const userInfo = {
-        avatarUrl: this.data.avatarUrl,
-        nickName: this.data.nickName.trim()
-      }
-
-      // 3. 云函数登录
-      const params = { code, userInfo }
       let result
 
-      // 提前判断环境，供 catch 块和后续逻辑共用
-      const accountInfo = wx.getAccountInfoSync()
-      const isDev = accountInfo.miniProgram.envVersion === 'develop'
+      if (isDev && selectedDevUser >= 0) {
+        // ===== 开发环境：devOpenid 模拟登录 =====
+        const devOpenid = DEV_TEST_USERS[selectedDevUser].value
+        const userInfo = {
+          avatarUrl: this.data.avatarUrl || '',
+          nickName: this.data.nickName.trim() || DEV_TEST_USERS[selectedDevUser].label
+        }
 
-      try {
-        result = await api.user.wechatLogin(params)
-      } catch (cloudErr) {
-        // 开发环境：云函数未部署时用 mock 数据绕过登录
-        if (isDev) {
-          console.warn('[DEV] 云函数未部署，使用 mock 登录模拟')
+        console.log(`[DEV] 使用 devOpenid 模拟登录: ${devOpenid}`)
+
+        try {
+          result = await api.user.wechatLogin({
+            code: '',
+            userInfo,
+            devOpenid
+          })
+        } catch (cloudErr) {
+          console.warn('[DEV] 云函数调用失败，使用本地 mock:', cloudErr)
+          // 云函数未部署时的兜底 mock
           result = {
-            openid: 'dev_mock_openid_' + Date.now(),
+            openid: devOpenid,
+            userID: '',
+            userName: DEV_TEST_USERS[selectedDevUser].label.split(' ')[0],
+            identity: 'student',
+            department: '',
+            isBound: true,
+            isBlacklisted: false,
             avatarUrl: userInfo.avatarUrl,
-            nickName: userInfo.nickName,
-            isBound: false
+            nickName: userInfo.nickName
           }
-        } else {
-          throw cloudErr
+        }
+
+      } else {
+        // ===== 生产环境：真实微信登录 =====
+        const code = await auth.getLoginCode()
+        const userInfo = {
+          avatarUrl: this.data.avatarUrl,
+          nickName: this.data.nickName.trim()
+        }
+
+        const params = { code, userInfo }
+        try {
+          result = await api.user.wechatLogin(params)
+        } catch (cloudErr) {
+          if (isDev) {
+            console.warn('[DEV] 云函数未部署，使用 mock 登录模拟')
+            result = {
+              openid: 'dev_mock_openid_' + Date.now(),
+              avatarUrl: userInfo.avatarUrl,
+              nickName: userInfo.nickName,
+              isBound: false
+            }
+          } else {
+            throw cloudErr
+          }
         }
       }
 
       if (result) {
-        // 缓存 openid 用于开发环境
+        // 缓存 devOpenid 用于开发环境
         if (isDev && result.openid) {
           wx.setStorageSync('_devOpenid', result.openid)
         }
@@ -151,7 +239,6 @@ Page({
         if (!result.isBound) {
           setTimeout(() => {
             wx.reLaunch({ url: '/pages/index/index' })
-            // reLaunch 完成后，页面的 onShow 不再触发 toast，这里用全局方式
             setTimeout(() => {
               wx.showToast({ title: '请绑定学号以使用全部功能', icon: 'none', duration: 2500 })
             }, 500)

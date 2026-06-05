@@ -42,6 +42,29 @@
       />
     </view>
 
+    <!-- 开发环境：测试用户快捷选择 -->
+    <view class="dev-section" wx:if="{{isDev}}">
+      <view class="dev-label">⚙️ 开发环境 — 模拟登录</view>
+      <view class="dev-user-list">
+        <view
+          wx:for="{{devUsers}}"
+          wx:key="value"
+          class="dev-user-chip {{selectedDevUser === index ? 'dev-user-chip--active' : ''}}"
+          data-index="{{index}}"
+          bindtap="onSelectDevUser"
+        >
+          {{item.label}}
+        </view>
+      </view>
+      <view
+        class="dev-real-link"
+        wx:if="{{selectedDevUser >= 0}}"
+        bindtap="onUseRealLogin"
+      >
+        ← 切回真实微信登录
+      </view>
+    </view>
+
     <!-- 登录按钮 -->
     <button
       class="login-btn {{canLogin ? 'login-btn--active' : ''}}"
@@ -49,7 +72,8 @@
       loading="{{loading}}"
       disabled="{{!canLogin || loading}}"
     >
-      <text>微信一键登录</text>
+      <text wx:if="{{isDev && selectedDevUser >= 0}}">模拟登录 · {{devUsers[selectedDevUser].label}}</text>
+      <text wx:else>微信一键登录</text>
     </button>
 
     <text class="hint">登录即表示同意《用户协议》和《隐私政策》</text>
