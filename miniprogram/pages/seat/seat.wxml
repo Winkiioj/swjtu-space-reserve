@@ -60,7 +60,7 @@
       </view>
       <view class="lecture-row">
         <view wx:for="{{morningLectures}}" wx:key="index"
-              class="lec-chip {{item.isSelected ? 'morning-chip-on' : ''}}"
+              class="lec-chip {{item.isPast ? 'lec-past' : ''}} {{item.isSelected ? 'morning-chip-on' : ''}}"
               bindtap="onLectureChange" data-index="{{item.index}}">
           <text class="chip-label">{{item.label}}</text>
           <text class="chip-time">{{item.time}}</text>
@@ -86,7 +86,7 @@
       </view>
       <view class="lecture-row">
         <view wx:for="{{afternoonLectures}}" wx:key="index"
-              class="lec-chip {{item.isSelected ? 'afternoon-chip-on' : ''}}"
+              class="lec-chip {{item.isPast ? 'lec-past' : ''}} {{item.isSelected ? 'afternoon-chip-on' : ''}}"
               bindtap="onLectureChange" data-index="{{item.index}}">
           <text class="chip-label">{{item.label}}</text>
           <text class="chip-time">{{item.time}}</text>
@@ -112,7 +112,7 @@
       </view>
       <view class="lecture-row">
         <view wx:for="{{eveningLectures}}" wx:key="index"
-              class="lec-chip {{item.isSelected ? 'evening-chip-on' : ''}}"
+              class="lec-chip {{item.isPast ? 'lec-past' : ''}} {{item.isSelected ? 'evening-chip-on' : ''}}"
               bindtap="onLectureChange" data-index="{{item.index}}">
           <text class="chip-label">{{item.label}}</text>
           <text class="chip-time">{{item.time}}</text>
