@@ -33,3 +33,9 @@
   margin-top: 40rpx;
   padding-bottom: 40rpx;
 }
+
+/* ========== 撤回倒计时 ========== */
+.adm-text-expired {
+  color: var(--adm-danger) !important;
+  font-weight: 500;
+}

@@ -1,39 +1,45 @@
 <view class="adm-page">
-  <block wx:for="{{applications}}" wx:key="_id">
-    <view class="adm-card" bindtap="goDetail" data-id="{{item._id}}" style="padding: 0;">
-      <!-- 卡片头部 -->
-      <view class="card-header">
-        <text style="font-size: 30rpx; font-weight: 600; color: var(--adm-text-primary);">{{item.userName}}</text>
-        <text wx:if="{{type === 'reviewed'}}" class="adm-badge {{item.rentalStatus === 1 ? 'adm-badge-approved' : 'adm-badge-rejected'}}">{{item.statusText}}</text>
-        <text wx:else class="adm-badge adm-badge-pending">待审核</text>
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <text class="s-icon">🔍</text>
+    <input class="s-input" placeholder="搜索申请人 / 教室 / 事由" bindinput="onSearchInput" value="{{keyword}}" confirm-type="search" />
+    <text wx:if="{{keyword}}" class="s-clear" bindtap="clearSearch">✕</text>
+  </view>
+  <view wx:if="{{keyword}}" class="s-hint">搜索"{{keyword}}" — 共 {{filtered.length}} 条结果</view>
+
+  <view wx:for="{{showList}}" wx:key="_id" class="app-card" bindtap="goDetail" data-id="{{item._id}}">
+    <view class="app-card-top">
+      <view class="app-user">
+        <view class="app-avatar">{{item._initial}}</view>
+        <view class="app-user-info">
+          <text class="app-user-name">{{item.userName}}</text>
+          <text class="app-user-id">{{item._subtitle}}</text>
+        </view>
       </view>
-      <!-- 卡片内容 -->
-      <view style="padding: 20rpx 30rpx 30rpx;">
-        <view class="adm-info-row">
-          <text class="adm-info-label">教室</text>
-          <text class="adm-info-value">{{item.classroomName}}</text>
-        </view>
-        <view class="adm-info-row">
-          <text class="adm-info-label">日期</text>
-          <text class="adm-info-value">{{item.rentDate}} 周{{item.rentDayOfWeek + 1}}</text>
-        </view>
-        <view class="adm-info-row">
-          <text class="adm-info-label">讲次</text>
-          <text class="adm-info-value">{{item.rentLecturesStr}}</text>
-        </view>
-        <view class="adm-info-row" style="border-bottom: none;">
-          <text class="adm-info-label">事由</text>
-          <text class="adm-info-value">{{item.rentalDetail}}</text>
-        </view>
+      <view class="app-status">
+        <text wx:if="{{item._revokeText}}" class="tag-revoke">{{item._revokeText}}</text>
+        <text class="tag-status {{item._statusClass}}">{{item.statusText}}</text>
       </view>
     </view>
-  </block>
+    <view class="app-card-body">
+      <view class="app-info-item">
+        <text class="app-info-icon">🏫</text>
+        <text class="app-info-text">{{item.classroomName}}</text>
+      </view>
+      <view class="app-info-item">
+        <text class="app-info-icon">📅</text>
+        <text class="app-info-text">{{item._dateDisplay}}</text>
+      </view>
+      <view class="app-info-item" wx:if="{{item.rentalDetail}}">
+        <text class="app-info-icon">📝</text>
+        <text class="app-info-text app-info-detail">{{item.rentalDetail}}</text>
+      </view>
+    </view>
+  </view>
 
-  <!-- 加载更多 -->
   <view wx:if="{{loading}}" class="adm-loading">加载中...</view>
-
-  <!-- 空状态 -->
-  <view wx:if="{{applications.length === 0 && !loading}}" class="adm-empty">
-    <text style="color: var(--adm-text-muted);">{{type === 'reviewed' ? '暂无已审核记录' : '暂无待审核申请'}}</text>
+  <view wx:if="{{!hasMore && hasData}}" class="adm-no-more">— 没有更多了 —</view>
+  <view wx:if="{{showEmpty && !loading}}" class="adm-empty">
+    <text>{{emptyText}}</text>
   </view>
 </view>

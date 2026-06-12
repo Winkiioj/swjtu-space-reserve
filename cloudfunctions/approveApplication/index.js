@@ -4,7 +4,7 @@ const db = cloud.database()
 const { success, fail } = require('./response')
 const { requireAdmin } = require('./auth')
 const { logAudit } = require('./audit')
-const { deepCopyMatrix } = require('./constants')
+const { deepCopyMatrix, REVIEW_EXPIRY_MS } = require('./constants')
 
 /**
  * 获取申请详情
@@ -102,6 +102,8 @@ exports.main = async (event) => {
         approverID: currentUserID,
         approvedAt: now,
         approvedClassroomId: isAlternative ? targetClassroomId : undefined,
+        notificationSent: false,      // 通知将在2小时后发送
+        reviewExpiresAt: now + REVIEW_EXPIRY_MS,  // 撤回截止时间
         updatedAt: now
       }
     })

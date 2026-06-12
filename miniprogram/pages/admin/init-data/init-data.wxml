@@ -147,7 +147,7 @@
       </view>
     </scroll-view>
 
-    <view class="adm-btn adm-btn-primary {{importing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{importing ? '' : 'doImport'}}" style="margin-top: 20rpx;">
+    <view class="adm-btn adm-btn-primary {{importing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="onBatchImport" style="margin-top: 20rpx;">
       {{importing ? '导入中...' : '确认导入 ' + classroomList.length + ' 间教室'}}
     </view>
   </view>
@@ -161,7 +161,7 @@
       </scroll-view>
       <view class="modal-actions">
         <view class="adm-btn adm-btn-outline" hover-class="adm-btn-active" bindtap="closeClassroomModal" style="flex:1;">取消</view>
-        <view class="adm-btn adm-btn-primary {{importing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{importing ? '' : 'submitClassroomImport'}}" style="flex:1; margin-left: 20rpx;">
+        <view class="adm-btn adm-btn-primary {{importing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="onJsonImport" style="flex:1; margin-left: 20rpx;">
           {{importing ? '导入中...' : '确认导入'}}
         </view>
       </view>
@@ -186,7 +186,7 @@
       </scroll-view>
       <view class="modal-actions">
         <view class="adm-btn adm-btn-outline" hover-class="adm-btn-active" bindtap="closeCourseModal" style="flex:1;">取消</view>
-        <view class="adm-btn adm-btn-primary {{importingCourses ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{importingCourses ? '' : 'submitCourseImport'}}" style="flex:1; margin-left: 20rpx;">
+        <view class="adm-btn adm-btn-primary {{importingCourses ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="onCourseImport" style="flex:1; margin-left: 20rpx;">
           {{importingCourses ? '导入中...' : '确认导入'}}
         </view>
       </view>

@@ -3,38 +3,50 @@ const AdminAPI = require('../../../utils/admin-api')
 
 Page({
   data: {
-    application: null,
+    application: {},
     applicantName: '',
     applicantPhone: '',
-    classroomInfo: null,
+    classroomInfo: {},
     lecturesStr: '',
     alternatives: [],
     isReviewed: false,
     statusText: '',
-    processing: false
+    statusBadgeClass: '',
+    processing: false,
+    canRevoke: false,
+    revokeCountdown: '',
+    btnApproving: false,
+    _countdownTimer: null
   },
 
-  onLoad(options) {
-    this.loadDetail(options.id)
+  onLoad(options) { this.loadDetail(options.id) },
+  onUnload() {
+    if (this.data._countdownTimer) clearInterval(this.data._countdownTimer)
   },
 
   async loadDetail(id) {
     wx.showLoading({ title: '加载中' })
     try {
       const d = await AdminAPI.getApplicationDetail(id)
-      const app = d.application
+      const app = d.application || {}
       const reviewed = [1, 2].includes(app.rentalStatus)
-      const statusMap = { 1: '已通过', 2: '已拒绝' }
+      const isApproved = app.rentalStatus === 1
+      const statusBadgeClass = isApproved ? 'adm-badge-approved' : 'adm-badge-rejected'
+      const statusText = isApproved ? '已通过' : '已拒绝'
+
       this.setData({
         application: app,
         applicantName: d.applicantName || app.proposerName || '',
         applicantPhone: d.applicantPhone || '',
-        classroomInfo: d.classroomInfo,
-        lecturesStr: d.lecturesStr,
-        alternatives: d.alternatives,
+        classroomInfo: d.classroomInfo || {},
+        lecturesStr: d.lecturesStr || '',
+        alternatives: d.alternatives || [],
         isReviewed: reviewed,
-        statusText: statusMap[app.rentalStatus] || ''
+        statusText: reviewed ? statusText : '',
+        statusBadgeClass: reviewed ? statusBadgeClass : ''
       })
+
+      if (isApproved && app.approvedAt) this.initRevokeCountdown(app.approvedAt)
     } catch (err) {
       console.error(err)
       wx.showToast({ title: err.message || '加载失败', icon: 'none' })
@@ -43,126 +55,92 @@ Page({
     }
   },
 
-  async approve() {
-    if (this.data.processing) return
-    const that = this
+  initRevokeCountdown(approvedAt) {
+    const TWO_HOURS = 2 * 60 * 60 * 1000
+    const expiresAt = approvedAt + TWO_HOURS
+
+    const update = () => {
+      const remaining = expiresAt - Date.now()
+      if (remaining <= 0) {
+        if (this.data._countdownTimer) { clearInterval(this.data._countdownTimer); this.setData({ _countdownTimer: null }) }
+        this.setData({ canRevoke: false, revokeCountdown: '已过撤回时限' })
+        return
+      }
+      const m = Math.floor(remaining / 60000)
+      const h = Math.floor(m / 60)
+      this.setData({ canRevoke: true, revokeCountdown: `剩余 ${h > 0 ? h + '小时' + (m % 60) + '分' : m + '分'}` })
+    }
+    update()
+    this.setData({ _countdownTimer: setInterval(update, 30000) })
+  },
+
+  onApprove() {
+    if (this.data.processing || this.data.btnApproving) return
+    this.setData({ btnApproving: true })
     wx.showModal({
       title: '确认通过',
-      content: `批准 ${that.data.classroomInfo.buildingBelong} ${that.data.classroomInfo.classroomID}？`,
-      success: async (res) => {
-        if (res.confirm) {
-          that.setData({ processing: true })
-          wx.showLoading({ title: '提交中' })
-          try {
-            // 不传 approvedClassroomId，使用原教室
-            await AdminAPI.approveApplication(that.data.application._id)
-            wx.hideLoading()
-            that.setData({ processing: false })
-            wx.showToast({ title: '已通过' })
-            setTimeout(() => wx.navigateBack(), 1500)
-          } catch (err) {
-            wx.hideLoading()
-            that.setData({ processing: false })
-            wx.showToast({ title: err.message || '操作失败', icon: 'none' })
-          }
+      content: '批准该申请？',
+      success: async (r) => {
+        if (!r.confirm) { this.setData({ btnApproving: false }); return }
+        this.setData({ processing: true })
+        wx.showLoading({ title: '提交中' })
+        try {
+          await AdminAPI.approveApplication(this.data.application._id)
+          wx.hideLoading()
+          this.setData({ processing: false, btnApproving: false })
+          wx.showToast({ title: '已通过' })
+          setTimeout(() => wx.navigateBack(), 1500)
+        } catch (err) {
+          wx.hideLoading()
+          this.setData({ processing: false, btnApproving: false })
+          wx.showToast({ title: err.message || '操作失败', icon: 'none' })
         }
-      }
+      },
+      fail: () => this.setData({ btnApproving: false })
     })
   },
 
-  rejectWithRecommend() {
+  onReject() {
     if (this.data.processing) return
-    const alts = this.data.alternatives
-    const itemList = alts.map(a => `${a.buildingBelong} ${a.classroomID}（${a.containNumber}人）`)
-    const that = this
-
-    wx.showActionSheet({
-      itemList,
-      success(res) {
-        // 已选替代教室显示在下方"推荐替代教室"区域，不重复写入拒绝原因
-        wx.showModal({
-          title: '拒绝申请',
-          editable: true,
-          placeholderText: '请输入拒绝原因',
-          success: async (r) => {
-            if (r.confirm) {
-              if (!r.content) {
-                wx.showToast({ title: '请填写拒绝原因', icon: 'none' })
-                return
-              }
-              that.setData({ processing: true })
-              wx.showLoading({ title: '提交中' })
-              try {
-                await AdminAPI.rejectApplication(that.data.application._id, r.content)
-                wx.hideLoading()
-                that.setData({ processing: false })
-                wx.showToast({ title: '已拒绝' })
-                setTimeout(() => wx.navigateBack(), 1500)
-              } catch (err) {
-                wx.hideLoading()
-                that.setData({ processing: false })
-                wx.showToast({ title: err.message || '操作失败', icon: 'none' })
-              }
-            }
-          }
-        })
-      }
-    })
-  },
-
-  async reject() {
-    if (this.data.processing) return
-
-    const that = this
+    this.setData({ processing: true })
     wx.showModal({
-      title: '拒绝申请',
-      editable: true,
-      placeholderText: '请输入拒绝原因',
-      success: async (res) => {
-        if (res.confirm) {
-          if (!res.content) {
-            wx.showToast({ title: '请填写拒绝原因', icon: 'none' })
-            return
-          }
-          that.setData({ processing: true })
-          wx.showLoading({ title: '提交中' })
-          try {
-            await AdminAPI.rejectApplication(that.data.application._id, res.content)
-            wx.hideLoading()
-            that.setData({ processing: false })
-            wx.showToast({ title: '已拒绝' })
-            setTimeout(() => wx.navigateBack(), 1500)
-          } catch (err) {
-            wx.hideLoading()
-            that.setData({ processing: false })
-            wx.showToast({ title: err.message || '操作失败', icon: 'none' })
-          }
+      title: '拒绝申请', editable: true, placeholderText: '请输入拒绝原因',
+      success: async (r) => {
+        if (!r.confirm || !r.content) { this.setData({ processing: false }); return }
+        try {
+          await AdminAPI.rejectApplication(this.data.application._id, r.content)
+          this.setData({ processing: false })
+          wx.showToast({ title: '已拒绝' })
+          setTimeout(() => wx.navigateBack(), 1500)
+        } catch (err) {
+          this.setData({ processing: false })
+          wx.showToast({ title: err.message || '操作失败', icon: 'none' })
         }
-      }
+      },
+      fail: () => this.setData({ processing: false })
     })
   },
 
-  async revoke() {
+  onRevoke() {
     if (this.data.processing) return
-    const that = this
+    if (!this.data.canRevoke) { wx.showToast({ title: '已过撤回时限', icon: 'none' }); return }
     wx.showModal({
-      title: '撤销审核',
-      content: '撤销后申请将恢复为待审核状态，确认撤销？',
-      success: async (res) => {
-        if (res.confirm) {
-          that.setData({ processing: true })
-          wx.showLoading({ title: '提交中' })
-          try {
-            await AdminAPI.revokeReview(that.data.application._id)
-            wx.hideLoading()
-            that.setData({ processing: false })
-            wx.showToast({ title: '已撤销' })
-            setTimeout(() => wx.navigateBack(), 1500)
-          } catch (err) {
-            wx.hideLoading()
-            that.setData({ processing: false })
-            wx.showToast({ title: err.message || '操作失败', icon: 'none' })
-          }
+      title: '撤销审核', content: '撤销后申请将恢复为待审核状态，确认撤销？',
+      success: async (r) => {
+        if (!r.confirm) return
+        this.setData({ processing: true })
+        wx.showLoading({ title: '提交中' })
+        try {
+          await AdminAPI.revokeReview(this.data.application._id)
+          if (this.data._countdownTimer) clearInterval(this.data._countdownTimer)
+          wx.hideLoading()
+          this.setData({ processing: false, canRevoke: false, revokeCountdown: '已撤销', _countdownTimer: null })
+          wx.showToast({ title: '已撤销' })
+          setTimeout(() => wx.navigateBack(), 1500)
+        } catch (err) {
+          wx.hideLoading()
+          this.setData({ processing: false })
+          wx.showToast({ title: err.message || '操作失败', icon: 'none' })
         }
       }
     })

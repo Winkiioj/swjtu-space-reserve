@@ -8,6 +8,7 @@ const db = cloud.database()
 const _ = db.command
 const { success, fail } = require('./response')
 const { requireAdmin } = require('./auth')
+const { REVIEW_EXPIRY_MS } = require('./constants')
 
 exports.main = async (event) => {
   const { currentUserID, page = 1, pageSize = 20 } = event
@@ -45,21 +46,37 @@ exports.main = async (event) => {
     classes.data.forEach(c => { classMap[c._id] = `${c.buildingBelong} ${c.classroomID}` })
 
     const statusMap = { 1: '已通过', 2: '已拒绝' }
+    const now = Date.now()
 
-    const enriched = listResult.data.map(app => ({
-      _id: app._id,
-      proposerID: app.proposerID,
-      userName: userMap[app.proposerID] || '未知',
-      classroomName: classMap[app.classroomApplied] || '未知',
-      rentDate: app.rentDate,
-      rentDayOfWeek: app.rentDayOfWeek,
-      rentLectures: app.rentLectures,
-      rentLecturesStr: app.rentLectures.map(l => l + 1).join(',') + '讲',
-      rentalDetail: app.rentalDetail,
-      rentalStatus: app.rentalStatus,
-      statusText: statusMap[app.rentalStatus] || '未知',
-      updatedAt: app.updatedAt
-    }))
+    const enriched = listResult.data.map(app => {
+      // 计算撤回状态（仅对已通过的申请）
+      let canRevoke = false
+      let revokeRemainingMs = 0
+      if (app.rentalStatus === 1 && app.approvedAt) {
+        const expiresAt = app.approvedAt + REVIEW_EXPIRY_MS
+        revokeRemainingMs = Math.max(0, expiresAt - now)
+        canRevoke = revokeRemainingMs > 0
+      }
+
+      return {
+        _id: app._id,
+        proposerID: app.proposerID,
+        userName: userMap[app.proposerID] || '未知',
+        classroomName: classMap[app.classroomApplied] || '未知',
+        rentDate: app.rentDate,
+        rentDayOfWeek: app.rentDayOfWeek,
+        rentLectures: app.rentLectures,
+        rentLecturesStr: app.rentLectures.map(l => l + 1).join(',') + '讲',
+        rentalDetail: app.rentalDetail,
+        rentalStatus: app.rentalStatus,
+        statusText: statusMap[app.rentalStatus] || '未知',
+        approvedAt: app.approvedAt || null,
+        updatedAt: app.updatedAt,
+        // 撤回时限相关
+        canRevoke,
+        revokeRemainingMs
+      }
+    })
 
     return success({ applications: enriched, total: countResult.total, page, pageSize })
   } catch (err) {

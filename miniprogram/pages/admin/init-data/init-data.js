@@ -150,7 +150,7 @@ Page({
   // ===== 移除某批教室 =====
   removeItem(e) {
     const index = e.currentTarget.dataset.index
-    const list = this.data.classroomList
+    const list = [...this.data.classroomList]
     list.splice(index, 1)
     this.setData({ classroomList: list })
   },
@@ -160,6 +160,10 @@ Page({
   },
 
   // ===== 执行导入 =====
+  onBatchImport() { if (this.data.importing) return; this.doImport() },
+  onJsonImport() { if (this.data.importing) return; this.submitClassroomImport() },
+  onCourseImport() { if (this.data.importingCourses) return; this.submitCourseImport() },
+
   async doImport() {
     const list = this.data.classroomList
     if (list.length === 0) {

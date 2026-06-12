@@ -1,8 +1,6 @@
 <view class="adm-page">
-  <!-- 申请信息 -->
   <view class="adm-card">
     <view class="adm-section-title">申请信息</view>
-
     <view class="adm-info-row">
       <text class="adm-info-label">申请人</text>
       <text class="adm-info-value">{{applicantName}} ({{application.proposerID}})</text>
@@ -41,15 +39,18 @@
     </view>
     <view wx:if="{{isReviewed}}" class="adm-info-row">
       <text class="adm-info-label">审核状态</text>
-      <text class="adm-info-value"><text class="adm-badge {{application.rentalStatus === 1 ? 'adm-badge-approved' : 'adm-badge-rejected'}}">{{statusText}}</text></text>
+      <text class="adm-info-value"><text class="adm-badge {{statusBadgeClass}}">{{statusText}}</text></text>
     </view>
     <view wx:if="{{application.rentalStatus === 2 && application.rejectionReason}}" class="adm-info-row">
       <text class="adm-info-label">拒绝原因</text>
       <text class="adm-info-value">{{application.rejectionReason}}</text>
     </view>
+    <view wx:if="{{application.rentalStatus === 1 && revokeCountdown}}" class="adm-info-row">
+      <text class="adm-info-label">撤回倒计时</text>
+      <text class="adm-info-value {{canRevoke ? '' : 'adm-text-expired'}}">{{revokeCountdown}}</text>
+    </view>
   </view>
 
-  <!-- 替代教室（只读展示，未审核时才显示） -->
   <view wx:if="{{!isReviewed}}" class="adm-card">
     <view class="adm-section-title">推荐替代教室</view>
     <view wx:for="{{alternatives}}" wx:key="index" class="alt-item">
@@ -63,15 +64,13 @@
     </view>
   </view>
 
-  <!-- 操作按钮 -->
   <view class="action-buttons">
     <block wx:if="{{!isReviewed}}">
-      <view class="adm-btn adm-btn-primary {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'approve'}}">通过申请</view>
-      <view wx:if="{{alternatives.length > 0}}" class="adm-btn adm-btn-warning {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'rejectWithRecommend'}}">拒绝并推荐替代教室</view>
-      <view class="adm-btn adm-btn-danger {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'reject'}}">拒绝申请</view>
+      <view class="adm-btn adm-btn-primary {{btnApproving ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="onApprove">通过申请</view>
+      <view class="adm-btn adm-btn-danger {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="onReject">拒绝申请</view>
     </block>
     <block wx:else>
-      <view class="adm-btn adm-btn-warning {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="{{processing ? '' : 'revoke'}}">撤销审核</view>
+      <view class="adm-btn {{canRevoke ? 'adm-btn-warning' : 'adm-btn-disabled'}}" hover-class="adm-btn-active" bindtap="onRevoke">{{canRevoke ? '撤销审核' : '已过撤回时限'}}</view>
     </block>
   </view>
 </view>

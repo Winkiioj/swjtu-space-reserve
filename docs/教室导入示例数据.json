@@ -1,0 +1,21 @@
+[
+  {"buildingBelong": "一号教学楼", "classroomID": "x1101", "containNumber": 120, "description": "多媒体教室，配备投影仪"},
+  {"buildingBelong": "一号教学楼", "classroomID": "x1201", "containNumber": 90, "description": "普通教室"},
+  {"buildingBelong": "一号教学楼", "classroomID": "x1337", "containNumber": 90, "description": "阶梯教室，配备音响"},
+  {"buildingBelong": "一号教学楼", "classroomID": "x1338", "containNumber": 100, "description": "阶梯教室"},
+
+  {"buildingBelong": "二号教学楼", "classroomID": "x2101", "containNumber": 90, "description": "多媒体教室"},
+
+  {"buildingBelong": "三号教学楼", "classroomID": "x3101", "containNumber": 80, "description": "多媒体教室"},
+  {"buildingBelong": "三号教学楼", "classroomID": "x3201", "containNumber": 60, "description": "小教室"},
+
+  {"buildingBelong": "四号教学楼", "classroomID": "x4101", "containNumber": 120, "description": "多媒体教室，配备投影仪"},
+
+  {"buildingBelong": "五号教学楼", "classroomID": "x5101", "containNumber": 100, "description": "多媒体教室"},
+
+  {"buildingBelong": "六号教学楼", "classroomID": "x6101", "containNumber": 80, "description": "普通教室"},
+
+  {"buildingBelong": "七号教学楼", "classroomID": "x7101", "containNumber": 60, "description": "小教室"},
+
+  {"buildingBelong": "八号教学楼", "classroomID": "x8101", "containNumber": 150, "description": "大阶梯教室"}
+]

@@ -3,6 +3,7 @@
  *
  * 仅在申请仍处于已通过(1)或已拒绝(2)状态时可撤销。
  * 若已通过，需要恢复教室状态矩阵（对应讲次从2恢复为0）。
+ * 已通过的申请仅在被批准后2小时内可撤回，过期不能撤回。
  */
 
 const cloud = require('wx-server-sdk')
@@ -11,6 +12,7 @@ const db = cloud.database()
 const { success, fail } = require('./response')
 const { requireAdmin } = require('./auth')
 const { logAudit } = require('./audit')
+const { REVIEW_EXPIRY_MS } = require('./constants')
 
 exports.main = async (event) => {
   const { applicationID, currentUserID } = event
@@ -25,6 +27,15 @@ exports.main = async (event) => {
     const app = appRes.data
     if (![1, 2].includes(app.rentalStatus)) {
       return fail(400, '只能撤销已通过或已拒绝的申请')
+    }
+
+    // ===== 2小时撤回时限检查（仅对已通过的申请） =====
+    if (app.rentalStatus === 1) {
+      const now = Date.now()
+      const expiresAt = app.approvedAt + REVIEW_EXPIRY_MS
+      if (now >= expiresAt) {
+        return fail(400, '已超过2小时撤回时限，无法撤销审核')
+      }
     }
 
     const now = Date.now()
