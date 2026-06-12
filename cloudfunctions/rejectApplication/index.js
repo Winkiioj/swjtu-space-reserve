@@ -27,6 +27,7 @@ exports.main = async (event) => {
         rejectionReason: reason || '',
         approverID: currentUserID,
         reviewedAt: now,
+        notificationSent: false,   // 标记需要发送拒绝通知
         updatedAt: now
       }
     })

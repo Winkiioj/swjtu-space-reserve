@@ -1,0 +1,104 @@
+@import '../../../styles/admin-theme.wxss';
+
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--adm-card-bg);
+  border-radius: var(--adm-radius-md);
+  padding: 24rpx 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: var(--adm-shadow);
+}
+
+.notif-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.notif-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--adm-text-primary);
+}
+
+.notif-unread-badge {
+  font-size: 20rpx;
+  color: #fff;
+  background: var(--adm-primary);
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.notif-mark-all {
+  font-size: 24rpx;
+  color: var(--adm-primary);
+  padding: 8rpx 16rpx;
+}
+
+.notif-mark-all:active {
+  opacity: 0.6;
+}
+
+/* 通知项 */
+.notif-item {
+  display: flex;
+  gap: 16rpx;
+  background: var(--adm-card-bg);
+  border-radius: var(--adm-radius-md);
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: var(--adm-shadow);
+}
+
+.notif-item-unread {
+  background: #f0f5ff;
+  border-left: 6rpx solid var(--adm-primary);
+}
+
+.notif-item:active {
+  opacity: 0.8;
+}
+
+.notif-icon {
+  font-size: 36rpx;
+  width: 48rpx;
+  text-align: center;
+  flex-shrink: 0;
+  margin-top: 2rpx;
+}
+
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-top {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 6rpx;
+}
+
+.notif-title-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--adm-text-primary);
+  flex: 1;
+}
+
+.notif-dot {
+  width: 14rpx;
+  height: 14rpx;
+  background: var(--adm-primary);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.notif-content {
+  display: block;
+  font-size: 24rpx;
+  color: var(--adm-text-secondary);
+  line-height: 1.5;
+}

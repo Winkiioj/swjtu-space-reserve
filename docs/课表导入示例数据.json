@@ -1,0 +1,49 @@
+[
+  {"classroomID": "x2101", "courseID": "CS101", "courseName": "高等数学", "schedule": {"dayOfWeek": 0, "startLecture": 0, "endLecture": 2}},
+  {"classroomID": "x2101", "courseID": "CS101", "courseName": "高等数学", "schedule": {"dayOfWeek": 2, "startLecture": 0, "endLecture": 2}},
+  {"classroomID": "x2101", "courseID": "CS103", "courseName": "数据库原理", "schedule": {"dayOfWeek": 1, "startLecture": 3, "endLecture": 5}},
+  {"classroomID": "x2101", "courseID": "CS103", "courseName": "数据库原理", "schedule": {"dayOfWeek": 3, "startLecture": 3, "endLecture": 5}},
+  {"classroomID": "x2101", "courseID": "EE101", "courseName": "大学物理", "schedule": {"dayOfWeek": 4, "startLecture": 6, "endLecture": 8}},
+
+  {"classroomID": "x1337", "courseID": "CS201", "courseName": "数据结构", "schedule": {"dayOfWeek": 0, "startLecture": 3, "endLecture": 5}},
+  {"classroomID": "x1337", "courseID": "CS201", "courseName": "数据结构", "schedule": {"dayOfWeek": 2, "startLecture": 3, "endLecture": 5}},
+  {"classroomID": "x1337", "courseID": "CS301", "courseName": "操作系统", "schedule": {"dayOfWeek": 1, "startLecture": 0, "endLecture": 2}},
+  {"classroomID": "x1337", "courseID": "CS301", "courseName": "操作系统", "schedule": {"dayOfWeek": 3, "startLecture": 0, "endLecture": 2}},
+
+  {"classroomID": "x1338", "courseID": "CS202", "courseName": "算法设计", "schedule": {"dayOfWeek": 0, "startLecture": 6, "endLecture": 8}},
+  {"classroomID": "x1338", "courseID": "CS202", "courseName": "算法设计", "schedule": {"dayOfWeek": 2, "startLecture": 6, "endLecture": 8}},
+  {"classroomID": "x1338", "courseID": "CS302", "courseName": "编译原理", "schedule": {"dayOfWeek": 4, "startLecture": 0, "endLecture": 2}},
+
+  {"classroomID": "x1101", "courseID": "MA101", "courseName": "线性代数", "schedule": {"dayOfWeek": 0, "startLecture": 9, "endLecture": 11}},
+  {"classroomID": "x1101", "courseID": "MA101", "courseName": "线性代数", "schedule": {"dayOfWeek": 2, "startLecture": 9, "endLecture": 11}},
+  {"classroomID": "x1101", "courseID": "EN101", "courseName": "大学英语", "schedule": {"dayOfWeek": 1, "startLecture": 6, "endLecture": 8}},
+  {"classroomID": "x1101", "courseID": "EN101", "courseName": "大学英语", "schedule": {"dayOfWeek": 3, "startLecture": 6, "endLecture": 8}},
+
+  {"classroomID": "x1201", "courseID": "PH101", "courseName": "毛泽东思想概论", "schedule": {"dayOfWeek": 1, "startLecture": 9, "endLecture": 11}},
+  {"classroomID": "x1201", "courseID": "PH101", "courseName": "毛泽东思想概论", "schedule": {"dayOfWeek": 3, "startLecture": 9, "endLecture": 11}},
+
+  {"classroomID": "x3101", "courseID": "CS401", "courseName": "软件工程", "schedule": {"dayOfWeek": 0, "startLecture": 0, "endLecture": 2}},
+  {"classroomID": "x3101", "courseID": "CS401", "courseName": "软件工程", "schedule": {"dayOfWeek": 2, "startLecture": 0, "endLecture": 2}},
+  {"classroomID": "x3101", "courseID": "CS402", "courseName": "计算机网络", "schedule": {"dayOfWeek": 1, "startLecture": 3, "endLecture": 5}},
+  {"classroomID": "x3101", "courseID": "CS402", "courseName": "计算机网络", "schedule": {"dayOfWeek": 3, "startLecture": 3, "endLecture": 5}},
+
+  {"classroomID": "x3201", "courseID": "MA201", "courseName": "概率论与数理统计", "schedule": {"dayOfWeek": 4, "startLecture": 0, "endLecture": 2}},
+  {"classroomID": "x3201", "courseID": "MA201", "courseName": "概率论与数理统计", "schedule": {"dayOfWeek": 4, "startLecture": 3, "endLecture": 5}},
+
+  {"classroomID": "x4101", "courseID": "EE201", "courseName": "电路分析", "schedule": {"dayOfWeek": 0, "startLecture": 3, "endLecture": 5}},
+  {"classroomID": "x4101", "courseID": "EE201", "courseName": "电路分析", "schedule": {"dayOfWeek": 2, "startLecture": 3, "endLecture": 5}},
+  {"classroomID": "x4101", "courseID": "EE202", "courseName": "模拟电子技术", "schedule": {"dayOfWeek": 1, "startLecture": 0, "endLecture": 2}},
+  {"classroomID": "x4101", "courseID": "EE202", "courseName": "模拟电子技术", "schedule": {"dayOfWeek": 3, "startLecture": 0, "endLecture": 2}},
+
+  {"classroomID": "x5101", "courseID": "ME101", "courseName": "机械制图", "schedule": {"dayOfWeek": 0, "startLecture": 6, "endLecture": 8}},
+  {"classroomID": "x5101", "courseID": "ME101", "courseName": "机械制图", "schedule": {"dayOfWeek": 2, "startLecture": 6, "endLecture": 8}},
+  {"classroomID": "x5101", "courseID": "ME201", "courseName": "理论力学", "schedule": {"dayOfWeek": 4, "startLecture": 6, "endLecture": 8}},
+
+  {"classroomID": "x6101", "courseID": "CE101", "courseName": "土木工程概论", "schedule": {"dayOfWeek": 1, "startLecture": 6, "endLecture": 8}},
+  {"classroomID": "x6101", "courseID": "CE101", "courseName": "土木工程概论", "schedule": {"dayOfWeek": 3, "startLecture": 6, "endLecture": 8}},
+
+  {"classroomID": "x7101", "courseID": "LA101", "courseName": "大学语文", "schedule": {"dayOfWeek": 0, "startLecture": 9, "endLecture": 11}},
+  {"classroomID": "x7101", "courseID": "LA101", "courseName": "大学语文", "schedule": {"dayOfWeek": 2, "startLecture": 9, "endLecture": 11}},
+
+  {"classroomID": "x8101", "courseID": "PE101", "courseName": "体育", "schedule": {"dayOfWeek": 4, "startLecture": 9, "endLecture": 11}}
+]
