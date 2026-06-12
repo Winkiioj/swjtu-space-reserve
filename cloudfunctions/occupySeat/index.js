@@ -2,6 +2,23 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
+// 讲次开始时间（当天分钟数），用于拦截已开始的讲次
+const LECTURE_START_MINUTES = [
+  8 * 60,       // 第1讲  08:00
+  8 * 60 + 55,  // 第2讲  08:55
+  9 * 60 + 50,  // 第3讲  09:50
+  10 * 60 + 45, // 第4讲  10:45
+  11 * 60 + 40, // 第5讲  11:40
+  14 * 60,      // 第6讲  14:00
+  14 * 60 + 50, // 第7讲  14:50
+  15 * 60 + 40, // 第8讲  15:40
+  16 * 60 + 40, // 第9讲  16:40
+  17 * 60 + 30, // 第10讲 17:30
+  19 * 60 + 30, // 第11讲 19:30
+  20 * 60 + 20, // 第12讲 20:20
+  21 * 60 + 10  // 第13讲 21:10
+]
+
 exports.main = async (event, context) => {
   const { seatId, dayType, lectures, date } = event
   const matrixField = dayType === 'this' ? 'thisDayStatusMatrix' : 'nextDayStatusMatrix'
@@ -9,6 +26,19 @@ exports.main = async (event, context) => {
   try {
     const wxContext = cloud.getWXContext()
     const userId = wxContext.OPENID
+
+    // 防止预约已过去的时间段
+    const now = new Date()
+    const todayStr = now.toISOString().slice(0, 10)
+    if (date && date === todayStr) {
+      const nowMinutes = now.getHours() * 60 + now.getMinutes()
+      const earliestLecture = Math.min(...lectures)
+      if (earliestLecture >= 0 && earliestLecture < LECTURE_START_MINUTES.length) {
+        if (nowMinutes >= LECTURE_START_MINUTES[earliestLecture]) {
+          return { code: 400, message: '该时段已开始，不可预约' }
+        }
+      }
+    }
 
     const transaction = await db.startTransaction()
 
@@ -56,7 +86,7 @@ exports.main = async (event, context) => {
     })
 
     // 创建预约记录
-    const now = Date.now()
+    const now2 = Date.now()
     const reservationResult = await transaction.collection('Reservations').add({
       data: {
         userId,
@@ -67,8 +97,8 @@ exports.main = async (event, context) => {
         dayType,
         lectures,
         status: 'active',
-        createdAt: now,
-        updatedAt: now
+        createdAt: now2,
+        updatedAt: now2
       }
     })
 

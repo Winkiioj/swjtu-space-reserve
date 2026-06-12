@@ -207,6 +207,18 @@
   transform: scale(0.95);
 }
 
+/* 已过去的讲次 — 置灰不可选 */
+.lec-past {
+  background: #f5f5f5;
+  border-color: #eee;
+  opacity: 0.55;
+}
+.lec-past .chip-label { color: #bbb; }
+.lec-past .chip-time { color: #ccc; }
+.lec-past:active {
+  transform: none;
+}
+
 /* ===== 上午选中：蓝底+蓝边框+白字 ===== */
 .morning-chip-on {
   background: #1677ff;

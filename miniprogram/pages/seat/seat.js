@@ -4,6 +4,23 @@ const PERIOD_MAP = {
   evening: { indices: [10, 11, 12], label: '晚上', icon: '🌙', time: '19:30 - 21:55' }
 }
 
+// 讲次开始时间（当天分钟数），用于过滤已过去的讲次
+const LECTURE_START_MINUTES = [
+  8 * 60,       // 第1讲  08:00
+  8 * 60 + 55,  // 第2讲  08:55
+  9 * 60 + 50,  // 第3讲  09:50
+  10 * 60 + 45, // 第4讲  10:45
+  11 * 60 + 40, // 第5讲  11:40
+  14 * 60,      // 第6讲  14:00
+  14 * 60 + 50, // 第7讲  14:50
+  15 * 60 + 40, // 第8讲  15:40
+  16 * 60 + 40, // 第9讲  16:40
+  17 * 60 + 30, // 第10讲 17:30
+  19 * 60 + 30, // 第11讲 19:30
+  20 * 60 + 20, // 第12讲 20:20
+  21 * 60 + 10  // 第13讲 21:10
+]
+
 const auth = require('../../utils/auth')
 const app = getApp()
 
@@ -53,6 +70,9 @@ Page({
         }
       })
     }
+
+    // 每次回到页面时刷新讲次列表（可能跨时间段后需要过滤）
+    this.buildLectureGroups()
   },
 
   formatDate(date) {
@@ -63,22 +83,52 @@ Page({
   },
 
   /**
-   * 从全局配置构建讲次分组，每个 item 自带 isSelected 标记
-   * WXML 只读 item.isSelected，不做 indexOf 运算，避免模板引擎兼容性问题
+   * 获取当前已过去的讲次索引集合（仅对"今天"有效）
+   */
+  _getPastLectureIndices() {
+    const now = new Date()
+    const nowMinutes = now.getHours() * 60 + now.getMinutes()
+    const past = new Set()
+    for (let i = 0; i < LECTURE_START_MINUTES.length; i++) {
+      if (nowMinutes >= LECTURE_START_MINUTES[i]) {
+        past.add(i)
+      }
+    }
+    return past
+  },
+
+  /**
+   * 从全局配置构建讲次分组，每个 item 自带 isSelected、isPast 标记
+   * 如果选了"今天"，则已开始的讲次标记为 isPast 且不可选
    */
   buildLectureGroups() {
     const config = app.globalData.config.lectureConfig.times
+    const pastIndices = this.data.dayType === 'this' ? this._getPastLectureIndices() : new Set()
+
     const all = config.map(t => ({
       index: t.index,
       label: t.label,
       time: t.time,
-      isSelected: false
+      isSelected: false,
+      isPast: pastIndices.has(t.index)
     }))
+
     this.setData({
       morningLectures: all.filter(t => t.index >= 0 && t.index <= 4),
       afternoonLectures: all.filter(t => t.index >= 5 && t.index <= 9),
       eveningLectures: all.filter(t => t.index >= 10 && t.index <= 12)
     })
+
+    // 清除已选中的已过去讲次
+    const { selectedLectures } = this.data
+    if (selectedLectures.length > 0) {
+      const valid = selectedLectures.filter(i => !pastIndices.has(i))
+      if (valid.length !== selectedLectures.length) {
+        this.setData({ selectedLectures: valid })
+        this._syncSelectionToItems(valid)
+        this.updatePeriodStates()
+      }
+    }
   },
 
   /**
@@ -113,14 +163,17 @@ Page({
   togglePeriod(e) {
     const period = e.currentTarget.dataset.period
     const indices = PERIOD_MAP[period].indices
+    // 过滤掉已过去的讲次
+    const pastIndices = this.data.dayType === 'this' ? this._getPastLectureIndices() : new Set()
+    const availableIndices = indices.filter(i => !pastIndices.has(i))
     const { selectedLectures } = this.data
-    const allSelected = indices.every(i => selectedLectures.indexOf(i) !== -1)
+    const allSelected = availableIndices.every(i => selectedLectures.indexOf(i) !== -1)
     let newSelected
     if (allSelected) {
       newSelected = selectedLectures.filter(i => indices.indexOf(i) === -1)
     } else {
       const set = new Set(selectedLectures)
-      indices.forEach(i => set.add(i))
+      availableIndices.forEach(i => set.add(i))
       newSelected = Array.from(set)
     }
     this.setData({ selectedLectures: newSelected })
@@ -133,6 +186,16 @@ Page({
    */
   onLectureChange(e) {
     const index = parseInt(e.currentTarget.dataset.index)
+
+    // 已过去的讲次不可选
+    if (this.data.dayType === 'this') {
+      const pastIndices = this._getPastLectureIndices()
+      if (pastIndices.has(index)) {
+        wx.showToast({ title: '该时段已开始，不可预约', icon: 'none' })
+        return
+      }
+    }
+
     let { selectedLectures } = this.data
     const idx = selectedLectures.indexOf(index)
     if (idx !== -1) {
@@ -147,6 +210,8 @@ Page({
 
   onDateChange(e) {
     this.setData({ dayType: e.detail.value })
+    // 切换日期后重新构建讲次列表（"今天"需要过滤已过去讲次）
+    this.buildLectureGroups()
   },
 
   searchSeats() {
