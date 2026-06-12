@@ -56,6 +56,30 @@
   text-align: center;
 }
 
+/* 设施多选网格 */
+.facility-grid {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.facility-chip {
+  padding: 12rpx 22rpx;
+  background: var(--adm-bg);
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  color: var(--adm-text-secondary);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.facility-chip.on {
+  background: var(--adm-primary);
+  color: #fff;
+}
+
 /* ===== 操作按钮 ===== */
 .form-actions {
   margin-top: 28rpx;
@@ -171,4 +195,77 @@
 .modal-actions {
   display: flex;
   margin-top: 32rpx;
+}
+
+/* ===== 一键重置 ===== */
+.reset-card {
+  border-left: 6rpx solid #f5222d;
+}
+
+.reset-progress {
+  margin-top: 8rpx;
+}
+
+.reset-step {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid var(--adm-border);
+  gap: 14rpx;
+}
+
+.reset-step:last-child {
+  border-bottom: none;
+}
+
+.reset-step-icon {
+  font-size: 28rpx;
+  width: 44rpx;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.reset-step-name {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--adm-text-primary);
+}
+
+.reset-step-name.running {
+  font-weight: 600;
+  color: var(--adm-primary);
+}
+
+.reset-step-name.fail {
+  color: var(--adm-danger);
+}
+
+.reset-step-status {
+  font-size: 22rpx;
+  color: var(--adm-text-muted);
+  flex-shrink: 0;
+}
+
+.reset-summary {
+  margin-top: 16rpx;
+  padding: 20rpx;
+  background: #f6ffed;
+  border-radius: var(--adm-radius-sm);
+  border: 1rpx solid #b7eb8f;
+}
+
+.reset-summary-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #389e0d;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.reset-summary-text {
+  font-size: 24rpx;
+  color: #333;
+  line-height: 1.8;
+  white-space: pre-line;
+  display: block;
 }

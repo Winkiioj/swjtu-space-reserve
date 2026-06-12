@@ -1,7 +1,7 @@
 /**
  * 教室预约 - 三步向导
  * Step 0: 选时间（周+日期+讲次+人数）
- * Step 1: 选教室（楼栋筛选 → 教室列表）
+ * Step 1: 选教室（楼栋/类型/设施/楼层筛选 → 教室列表）
  * Step 2: 确认提交（事由+说明）
  */
 const app = getApp()
@@ -23,12 +23,18 @@ Page({
     selectedDate: '',
     dayOfWeekText: '',
     selectedLectures: [],
-    lecturePicked: {},  // WXML 模板用简单属性查入选状态（indexOf 在部分基础库不可用）
+    lecturePicked: {},
     capacity: 30,
     dateRange: { start: '', end: '' },
 
-    // 第二步：教室
+    // 第二步：教室筛选
     selectedBuilding: '',
+    selectedRoomType: '',        // 教室类型（''=全部）
+    selectedFloor: 0,            // 楼层（0=全部）
+    selectedFacilities: [],      // 设施（多选，存 key 数组）
+    facilityPicked: {},          // 设施选中状态 map
+    showFilter: false,           // 展开/收起高级筛选
+    filterCount: 0,              // 高级筛选项计数
     classrooms: [],
     selectedClassroom: '',
     selectedClassroomInfo: {},
@@ -41,13 +47,20 @@ Page({
 
     // 静态数据
     lectures: [],
-    buildings: []
+    buildings: [],
+    roomTypes: [],
+    facilities: [],
+    floors: []
   },
 
   onLoad(options) {
+    const config = app.globalData.config
     this.setData({
-      lectures: app.globalData.config.lectureConfig.times,
-      buildings: app.globalData.config.buildings
+      lectures: config.lectureConfig.times,
+      buildings: config.buildings,
+      roomTypes: config.roomTypes,
+      facilities: config.facilities,
+      floors: config.floors
     })
 
     // 预填今天，计算可预约的日期范围
@@ -57,9 +70,7 @@ Page({
     const d = String(today.getDate()).padStart(2, '0')
     const todayStr = `${y}-${m}-${d}`
 
-    // 最大可预约到下周周五
-    // 找到下周五
-    const jsDay = today.getDay() // 0=周日
+    const jsDay = today.getDay()
     const daysUntilNextFriday = jsDay <= 5 ? (5 - jsDay + 7) : (5 - jsDay + 7)
     const maxDate = new Date(today)
     maxDate.setDate(today.getDate() + daysUntilNextFriday)
@@ -96,7 +107,6 @@ Page({
       return
     }
 
-    // 如果是从教室详情页选了教室回来，可能需要重新加载
     this.updateCanProceed()
   },
 
@@ -142,7 +152,6 @@ Page({
       arr = best
     }
 
-    // 同步更新 lecturePicked map（WXML 用简单属性查入选状态）
     const picked = {}
     arr.forEach(i => { picked[i] = true })
     this.setData({ selectedLectures: arr, lecturePicked: picked })
@@ -155,7 +164,7 @@ Page({
     this.setData({ capacity: v })
   },
 
-  // ====== 第二步：教室选择 ======
+  // ====== 第二步：教室选择与筛选 ======
 
   onBuildingSelect(e) {
     this.setData({
@@ -164,6 +173,73 @@ Page({
       selectedClassroomInfo: {}
     })
     this.loadClassrooms()
+  },
+
+  onRoomTypeSelect(e) {
+    this.setData({
+      selectedRoomType: e.currentTarget.dataset.type,
+      selectedClassroom: '',
+      selectedClassroomInfo: {}
+    })
+    this._updateFilterCount()
+    this.loadClassrooms()
+  },
+
+  onFloorSelect(e) {
+    this.setData({
+      selectedFloor: parseInt(e.currentTarget.dataset.floor),
+      selectedClassroom: '',
+      selectedClassroomInfo: {}
+    })
+    this._updateFilterCount()
+    this.loadClassrooms()
+  },
+
+  onFacilityToggle(e) {
+    const key = e.currentTarget.dataset.key
+    let arr = [...this.data.selectedFacilities]
+    if (arr.includes(key)) {
+      arr = arr.filter(k => k !== key)
+    } else {
+      arr.push(key)
+    }
+    const picked = {}
+    arr.forEach(k => { picked[k] = true })
+    this.setData({
+      selectedFacilities: arr,
+      facilityPicked: picked,
+      selectedClassroom: '',
+      selectedClassroomInfo: {}
+    })
+    this._updateFilterCount()
+    this.loadClassrooms()
+  },
+
+  toggleFilter() {
+    this.setData({ showFilter: !this.data.showFilter })
+  },
+
+  resetFilter() {
+    this.setData({
+      selectedBuilding: '',
+      selectedRoomType: '',
+      selectedFloor: 0,
+      selectedFacilities: [],
+      facilityPicked: {},
+      filterCount: 0,
+      selectedClassroom: '',
+      selectedClassroomInfo: {}
+    })
+    this.loadClassrooms()
+  },
+
+  _updateFilterCount() {
+    const { selectedRoomType, selectedFloor, selectedFacilities } = this.data
+    let count = 0
+    if (selectedRoomType) count++
+    if (selectedFloor > 0) count++
+    if (selectedFacilities.length > 0) count++
+    this.setData({ filterCount: count })
   },
 
   onClassroomSelect(e) {
@@ -183,7 +259,8 @@ Page({
   },
 
   async loadClassrooms() {
-    const { selectedDate, selectedWeek, selectedLectures, capacity, selectedBuilding } = this.data
+    const { selectedDate, selectedWeek, selectedLectures, capacity,
+            selectedBuilding, selectedRoomType, selectedFloor, selectedFacilities } = this.data
     if (!selectedDate || selectedLectures.length === 0) return
 
     const dayOfWeek = this.getSystemDayOfWeek(selectedDate)
@@ -195,14 +272,21 @@ Page({
     this.setData({ loading: true, classrooms: [], selectedClassroom: '', selectedClassroomInfo: {} })
 
     try {
-      const result = await api.classroom.searchAvailable({
+      const params = {
         rentDate: selectedDate,
         rentWeek: selectedWeek,
         rentDayOfWeek: dayOfWeek,
         rentLectures: selectedLectures,
         minCapacity: capacity,
         building: selectedBuilding
-      })
+      }
+
+      // 新增筛选参数
+      if (selectedRoomType) params.roomType = selectedRoomType
+      if (selectedFloor > 0) params.floor = selectedFloor
+      if (selectedFacilities.length > 0) params.facilities = selectedFacilities
+
+      const result = await api.classroom.searchAvailable(params)
       this.setData({ classrooms: result || [] })
     } catch (err) {
       console.error('查询教室失败:', err)
@@ -273,7 +357,7 @@ Page({
     if (this.data.currentStep === 0) {
       this.setData({ currentStep: 1 })
       this.updateCanProceed()
-      this.loadClassrooms() // 异步加载，页面显示 loading
+      this.loadClassrooms()
       return
     }
 
@@ -308,7 +392,6 @@ Page({
     }
     this.setData({ canProceed: can })
 
-    // 预计算讲次摘要（第三步显示用）
     if (this.data.selectedLectures.length > 0) {
       const s = [...this.data.selectedLectures].sort((a, b) => a - b)
       const first = this.data.lectures.find(l => l.index === s[0])

@@ -2,7 +2,7 @@
 <view class="page">
   <!-- 步骤指示器 -->
   <view class="step-bar">
-    <view class="step {{currentStep >= 0 ? 'on' : ''}}" wx:for="{{steps}}" wx:key="idx">
+    <view class="step {{currentStep >= index ? 'on' : ''}}" wx:for="{{steps}}" wx:key="idx">
       <view class="step-dot">{{item.num}}</view>
       <text class="step-label">{{item.label}}</text>
     </view>
@@ -64,9 +64,10 @@
 
   <!-- ==================== 第二步：选择教室 ==================== -->
   <view wx:if="{{currentStep === 1}}" class="body">
-    <!-- 筛选栏 -->
+
+    <!-- 楼栋筛选（一级） -->
     <view class="filter-bar">
-      <view class="fbar-item {{selectedBuilding === '' ? 'on' : ''}}" bindtap="onBuildingSelect" data-building="">全部</view>
+      <view class="fbar-item {{selectedBuilding === '' ? 'on' : ''}}" bindtap="onBuildingSelect" data-building="">全部楼栋</view>
       <view
         class="fbar-item {{selectedBuilding === item.id ? 'on' : ''}}"
         wx:for="{{buildings}}"
@@ -74,6 +75,69 @@
         bindtap="onBuildingSelect"
         data-building="{{item.id}}"
       >{{item.name}}</view>
+    </view>
+
+    <!-- 高级筛选面板 -->
+    <view class="filter-adv">
+      <view class="filter-adv-head" bindtap="toggleFilter">
+        <text class="filter-adv-label">🔍 高级筛选</text>
+        <view class="filter-adv-tag" wx:if="{{selectedRoomType || selectedFloor > 0 || selectedFacilities.length > 0}}">
+          {{filterCount}} 项已选
+        </view>
+        <text class="filter-adv-arrow {{showFilter ? 'open' : ''}}">{{showFilter ? '▲' : '▼'}}</text>
+      </view>
+
+      <view wx:if="{{showFilter}}" class="filter-adv-body">
+        <!-- 教室类型 -->
+        <view class="filter-row">
+          <text class="filter-row-label">类型</text>
+          <scroll-view scroll-x class="filter-row-scroll">
+            <view class="fchip {{selectedRoomType === '' ? 'on' : ''}}" bindtap="onRoomTypeSelect" data-type="">全部</view>
+            <view
+              class="fchip {{selectedRoomType === item.value ? 'on' : ''}}"
+              wx:for="{{roomTypes}}"
+              wx:key="value"
+              wx:if="{{item.value !== ''}}"
+              bindtap="onRoomTypeSelect"
+              data-type="{{item.value}}"
+            >{{item.label}}</view>
+          </scroll-view>
+        </view>
+
+        <!-- 楼层 -->
+        <view class="filter-row">
+          <text class="filter-row-label">楼层</text>
+          <scroll-view scroll-x class="filter-row-scroll">
+            <view class="fchip {{selectedFloor === 0 ? 'on' : ''}}" bindtap="onFloorSelect" data-floor="0">全部</view>
+            <view
+              class="fchip {{selectedFloor === item ? 'on' : ''}}"
+              wx:for="{{floors}}"
+              wx:key="*this"
+              bindtap="onFloorSelect"
+              data-floor="{{item}}"
+            >{{item}}F</view>
+          </scroll-view>
+        </view>
+
+        <!-- 设施 -->
+        <view class="filter-row">
+          <text class="filter-row-label">设施</text>
+          <view class="filter-row-scroll" style="flex-wrap: wrap; display: flex; gap: 10rpx;">
+            <view
+              class="fchip fchip-multi {{facilityPicked[item.key] ? 'on' : ''}}"
+              wx:for="{{facilities}}"
+              wx:key="key"
+              bindtap="onFacilityToggle"
+              data-key="{{item.key}}"
+            >{{facilityPicked[item.key] ? '✓ ' : ''}}{{item.label}}</view>
+          </view>
+        </view>
+
+        <!-- 重置 -->
+        <view class="filter-reset-row" wx:if="{{selectedRoomType || selectedFloor > 0 || selectedFacilities.length > 0}}">
+          <text class="filter-reset" bindtap="resetFilter">↺ 重置全部筛选</text>
+        </view>
+      </view>
     </view>
 
     <!-- 加载中 -->
@@ -85,7 +149,7 @@
     <view class="card center" wx:elif="{{classrooms.length === 0 && !loading}}">
       <text class="empty-icon">📭</text>
       <text class="empty-text">没有符合条件的教室</text>
-      <text class="empty-hint">试试调整时间、讲次或人数</text>
+      <text class="empty-hint">试试调整时间、讲次、人数或筛选条件</text>
     </view>
 
     <!-- 教室列表 -->
@@ -112,8 +176,11 @@
             </view>
           </view>
         </view>
-        <view class="room-tags" wx:if="{{item.floor}}">
-          <text class="tag">{{item.floor}} 楼</text>
+        <!-- 教室标签：类型 + 楼层 + 设施 -->
+        <view class="room-tags" wx:if="{{item.roomType || item.floor}}">
+          <text class="tag tag-type" wx:if="{{item.roomType}}">{{item.roomType}}</text>
+          <text class="tag" wx:if="{{item.floor}}">{{item.floor}}F</text>
+          <text class="tag tag-facility" wx:for="{{item.facilities}}" wx:for-item="f" wx:key="*this" wx:if="{{item.facilities && item.facilities.length}}">{{f}}</text>
         </view>
       </view>
     </block>
@@ -133,13 +200,21 @@
           <text class="sum-k">教室</text>
           <text class="sum-v">{{selectedClassroomInfo.buildingBelong}} {{selectedClassroomInfo.classroomID}}</text>
         </view>
+        <view class="sum-row" wx:if="{{selectedClassroomInfo.roomType}}">
+          <text class="sum-k">类型</text>
+          <text class="sum-v">{{selectedClassroomInfo.roomType}}</text>
+        </view>
         <view class="sum-row">
           <text class="sum-k">容量</text>
           <text class="sum-v">{{selectedClassroomInfo.containNumber}} 人（预计 {{capacity}} 人）</text>
         </view>
         <view class="sum-row" wx:if="{{selectedClassroomInfo.description}}">
-          <text class="sum-k">设备</text>
+          <text class="sum-k">描述</text>
           <text class="sum-v">{{selectedClassroomInfo.description}}</text>
+        </view>
+        <view class="sum-row" wx:if="{{selectedClassroomInfo.facilities && selectedClassroomInfo.facilities.length > 0}}">
+          <text class="sum-k">设施</text>
+          <text class="sum-v">{{selectedClassroomInfo.facilities}}</text>
         </view>
       </view>
     </view>
