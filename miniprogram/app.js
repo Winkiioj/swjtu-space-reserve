@@ -41,8 +41,36 @@ App({
       },
       buildings: [
         { id: '一号教学楼', name: '一号教学楼' },
-        { id: '二号教学楼', name: '二号教学楼' }
-      ]
+        { id: '二号教学楼', name: '二号教学楼' },
+        { id: '三号教学楼', name: '三号教学楼' },
+        { id: '四号教学楼', name: '四号教学楼' },
+        { id: '五号教学楼', name: '五号教学楼' },
+        { id: '六号教学楼', name: '六号教学楼' },
+        { id: '七号教学楼', name: '七号教学楼' },
+        { id: '八号教学楼', name: '八号教学楼' }
+      ],
+      roomTypes: [
+        { value: '', label: '全部类型' },
+        { value: '普通教室', label: '普通教室' },
+        { value: '多媒体教室', label: '多媒体教室' },
+        { value: '阶梯教室', label: '阶梯教室' },
+        { value: '智慧教室', label: '智慧教室' },
+        { value: '机房', label: '机房' },
+        { value: '研讨室', label: '研讨室' },
+        { value: '实验室', label: '实验室' },
+        { value: '报告厅', label: '报告厅' }
+      ],
+      facilities: [
+        { key: 'projector', label: '投影仪' },
+        { key: 'sound', label: '音响/话筒' },
+        { key: 'aircon', label: '空调' },
+        { key: 'computer', label: '教学电脑' },
+        { key: 'recording', label: '录播系统' },
+        { key: 'smartBoard', label: '智慧白板' },
+        { key: 'wifi', label: '高速WiFi' },
+        { key: 'labEquipment', label: '实验设备' }
+      ],
+      floors: [1, 2, 3, 4, 5, 6]
     }
   },
 
@@ -52,12 +80,17 @@ App({
 
     // 首次启动登录守卫：直接在 onLaunch 中处理，避免各页面 onLoad 重复 reLaunch
     if (!auth.isLoggedIn()) {
+      // 关键：必须在 reLaunch 之前标记 _launched=true
+      // 否则 reLaunch 触发的 onShow 会把 _launched 设为 true，
+      // 然后登录页加载完成的 onShow 会误判为"从后台切回"再次 reLaunch
+      this.globalData._launched = true
       wx.reLaunch({ url: '/pages/login/index' })
     }
   },
 
   onShow() {
-    // 从后台切回前台时的登录守卫（避免和 onLaunch 的守卫重复触发）
+    // 从后台切回前台时的登录守卫：仅 _launched 为 true 时进入
+    // onLaunch 中已 set _launched=true，此处的 onShow 是 reLaunch 触发的
     if (this.globalData._launched) {
       if (!auth.isLoggedIn()) {
         const pages = getCurrentPages()

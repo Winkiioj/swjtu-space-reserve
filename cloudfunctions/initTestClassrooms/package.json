@@ -1,0 +1,5 @@
+{
+  "name": "initTestClassrooms",
+  "version": "1.0.0",
+  "description": "初始化测试教室（含 roomType/facilities/floor 新字段）"
+}

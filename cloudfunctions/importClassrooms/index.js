@@ -37,12 +37,22 @@ exports.main = async (event) => {
     }
     try {
       const emptyMatrix = createEmptyMatrix()
+      // 从 classroomID 中提取楼层（格式：x{楼号}{楼层}{序号}，如 x1101 → floor=1）
+      const extractedFloor = room.floor !== undefined
+        ? parseInt(room.floor)
+        : (room.classroomID && room.classroomID.length >= 3
+            ? parseInt(room.classroomID.charAt(2))
+            : 1)
+
       await db.collection('Classrooms').add({
         data: {
           buildingBelong: room.buildingBelong,
           classroomID: room.classroomID,
           containNumber: room.containNumber,
           description: room.description || '',
+          roomType: room.roomType || '普通教室',
+          facilities: room.facilities || [],
+          floor: extractedFloor,
           thisWeekStatusMatrix: emptyMatrix,
           nextWeekStatusMatrix: createEmptyMatrix(),
           createdAt: Date.now(),

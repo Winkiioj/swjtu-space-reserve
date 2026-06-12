@@ -1,9 +1,48 @@
 <view class="adm-page">
+  <!-- ===== 一键重置测试环境 ===== -->
+  <view class="adm-card reset-card">
+    <view class="adm-section-title">⚡ 一键重置测试环境</view>
+    <text style="font-size: 26rpx; color: var(--adm-text-secondary); display: block; margin-bottom: 24rpx;">
+      清空并重建全部测试数据：教室(20间) + 用户(11人) + 申请(10条) + 座位(200个)。重置前请确保云函数已部署。
+    </text>
+
+    <!-- 未开始 -->
+    <view wx:if="{{!resetRunning && !resetDone}}">
+      <view class="adm-btn adm-btn-danger" hover-class="adm-btn-active" bindtap="startReset">一键重置全部数据</view>
+    </view>
+
+    <!-- 执行中 -->
+    <view wx:if="{{resetRunning}}" class="reset-progress">
+      <view class="reset-step" wx:for="{{resetSteps}}" wx:key="name">
+        <text class="reset-step-icon">
+          {{item.status === 'wait' ? '○' : ''}}
+          {{item.status === 'running' ? '⏳' : ''}}
+          {{item.status === 'done' ? '✅' : ''}}
+          {{item.status === 'fail' ? '❌' : ''}}
+        </text>
+        <text class="reset-step-name {{item.status}}">{{item.name}}</text>
+        <text class="reset-step-status">
+          {{item.status === 'wait' ? '等待' : ''}}
+          {{item.status === 'running' ? '执行中...' : ''}}
+          {{item.status === 'done' ? '完成' : ''}}
+          {{item.status === 'fail' ? '失败' : ''}}
+        </text>
+      </view>
+    </view>
+
+    <!-- 完成 -->
+    <view wx:if="{{resetDone && resetSummary}}" class="reset-summary">
+      <text class="reset-summary-title">✅ 重置完成</text>
+      <text class="reset-summary-text">{{resetSummary}}</text>
+      <view class="adm-btn adm-btn-primary" hover-class="adm-btn-active" bindtap="startReset" style="margin-top: 20rpx;">再次重置</view>
+    </view>
+  </view>
+
   <!-- ===== 教室导入表单 ===== -->
   <view class="adm-card">
     <view class="adm-section-title">📚 导入教室数据</view>
     <text style="font-size: 26rpx; color: var(--adm-text-secondary); display: block; margin-bottom: 32rpx;">
-      使用下拉框选择教学楼、楼层和编号范围，批量生成教室。
+      选择教学楼、楼层、编号范围和教室属性，批量生成教室。
     </text>
 
     <!-- 教学楼 -->
@@ -49,10 +88,37 @@
       </picker>
     </view>
 
+    <!-- 教室类型 -->
+    <view class="form-row">
+      <text class="form-label">教室类型</text>
+      <picker mode="selector" range="{{roomTypes}}" value="{{selectedRoomTypeIndex}}" bindchange="onRoomTypeChange">
+        <view class="form-picker">
+          <text>{{roomTypes[selectedRoomTypeIndex]}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 设施 -->
+    <view class="form-row">
+      <text class="form-label">设施设备（多选）</text>
+      <view class="facility-grid">
+        <view
+          class="facility-chip {{facilityChecked[item.key] ? 'on' : ''}}"
+          wx:for="{{facilityOptions}}"
+          wx:key="key"
+          bindtap="onFacilityToggle"
+          data-key="{{item.key}}"
+        >
+          <text>{{facilityChecked[item.key] ? '✓ ' : ''}}{{item.label}}</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 描述 -->
     <view class="form-row" style="border-bottom: none;">
-      <text class="form-label">描述</text>
-      <input class="form-input" type="text" value="{{description}}" bindinput="onDescInput" placeholder="如：多媒体教室" />
+      <text class="form-label">描述（可选）</text>
+      <input class="form-input" type="text" value="{{description}}" bindinput="onDescInput" placeholder="如：配备投影仪和智慧白板" />
     </view>
 
     <!-- 生成按钮 -->
@@ -74,6 +140,7 @@
         <view class="preview-info">
           <text class="preview-building">{{item.buildingBelong}}</text>
           <text class="preview-room">{{item.classroomID}}</text>
+          <text class="preview-type" wx:if="{{item.roomType}}" style="font-size: 22rpx; color: var(--adm-primary); margin-right: 8rpx;">{{item.roomType}}</text>
           <text class="preview-capacity">{{item.containNumber}}人</text>
         </view>
         <text class="preview-remove" bindtap="removeItem" data-index="{{i}}">✕</text>
@@ -90,7 +157,7 @@
     <view class="modal-content">
       <text class="modal-title">粘贴教室 JSON</text>
       <scroll-view scroll-y class="modal-scroll">
-        <textarea class="modal-textarea" value="{{classroomJson}}" bindinput="onClassroomJsonInput" placeholder='[{"buildingBelong":"一号教学楼","classroomID":"x1101","containNumber":90,"description":"多媒体教室"}]' maxlength="-1" />
+        <textarea class="modal-textarea" value="{{classroomJson}}" bindinput="onClassroomJsonInput" placeholder='[{"buildingBelong":"一号教学楼","classroomID":"x1101","containNumber":90,"roomType":"多媒体教室","facilities":["投影仪","空调"],"description":"配备投影仪"}]' maxlength="-1" />
       </scroll-view>
       <view class="modal-actions">
         <view class="adm-btn adm-btn-outline" hover-class="adm-btn-active" bindtap="closeClassroomModal" style="flex:1;">取消</view>
