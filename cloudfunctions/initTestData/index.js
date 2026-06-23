@@ -47,7 +47,7 @@ const TEST_APPLICATIONS = [
     appliedAt: 1717094400000
   },
   {
-    classroomID: 'x1203',
+    classroomID: 'x1205',
     proposerID: 'dev_openid_2023112593', proposerName: '王凯',
     rentalDetail: '高数答疑课',
     rentalDescription: '',
@@ -102,7 +102,7 @@ const TEST_APPLICATIONS = [
     appliedAt: 1717488000000
   },
   {
-    classroomID: 'x6201',
+    classroomID: 'x6205',
     proposerID: 'dev_openid_2023112544', proposerName: '赵强',
     rentalDetail: '科研小组讨论',
     rentalDescription: '交通大数据项目组会',
@@ -114,7 +114,7 @@ const TEST_APPLICATIONS = [
   },
   // 已通过的申请
   {
-    classroomID: 'x1102',
+    classroomID: 'x1337',
     proposerID: 'dev_openid_admin001', proposerName: '管理员',
     rentalDetail: '已通过的测试申请',
     rentalDescription: '',
@@ -127,7 +127,7 @@ const TEST_APPLICATIONS = [
   },
   // 已拒绝的申请
   {
-    classroomID: 'x2102',
+    classroomID: 'x2310',
     proposerID: 'dev_openid_2023112533', proposerName: '孙丽',
     rentalDetail: '已拒绝的申请-时间冲突',
     rentalDescription: '',

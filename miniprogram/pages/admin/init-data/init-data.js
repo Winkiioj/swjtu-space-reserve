@@ -300,10 +300,7 @@ Page({
       this.setData({ importingCourses: false })
       wx.showToast({ title: err.message || '导入失败', icon: 'none' })
     }
-  }
-	      wx.showToast({ title: err.message || '导入失败', icon: 'none' })
-	    }
-	  },
+  },
 
   // ===== 一键重置测试环境 =====
 
@@ -312,7 +309,7 @@ Page({
 
     wx.showModal({
       title: '确认重置',
-      content: '将清空教室/申请/通知，重新导入 20 间测试教室、11 个用户、10 条申请和 200 个座位。确定继续？',
+      content: '将清空教室/申请/通知，重新导入 20 间测试教室、11 个用户、10 条申请和 180 个座位。确定继续？',
       confirmText: '确认重置',
       confirmColor: '#f5222d',
       success: async (r) => {
@@ -327,7 +324,7 @@ Page({
       { name: '清空旧数据', fn: () => wx.cloud.callFunction({ name: 'initTestClassrooms', data: { clean: true } }) },
       { name: '导入测试教室 20间', fn: () => wx.cloud.callFunction({ name: 'initTestClassrooms' }) },
       { name: '导入测试用户+申请', fn: () => wx.cloud.callFunction({ name: 'initTestData' }) },
-      { name: '导入测试座位 200个', fn: () => wx.cloud.callFunction({ name: 'initSeats', data: { clean: true } }) },
+      { name: '导入测试座位 180个', fn: () => wx.cloud.callFunction({ name: 'initSeats', data: { clean: true } }) },
       { name: '统计校验', fn: () => wx.cloud.callFunction({ name: 'dataStats' }) }
     ]
 
@@ -362,7 +359,7 @@ Page({
       if (s1.data.byType) lines.push(`类型: ${Object.entries(s1.data.byType).map(([k,v]) => `${k}x${v}`).join(', ')}`)
     }
     if (s2?.data) lines.push(`用户: 新建${s2.data.users.created} 已存在${s2.data.users.existed} | 申请: 新建${s2.data.applications.created}`)
-    if (s4?.data) lines.push(`验证: 教室${s4.data.classrooms}间 用户${s4.data.users}人 申请${s4.data.applications}条 座位${s4.data.seats}个`)
+    if (s4?.data) lines.push(`验证: 教室${s4.data.Classrooms?.total ?? '?'}间 用户${s4.data.Users?.total ?? '?'}人 申请${s4.data.Applications?.total ?? '?'}条 座位${s4.data.Seats?.total ?? '?'}个`)
 
     this.setData({ resetRunning: false, resetDone: true, resetSummary: lines.join('\n') })
   },

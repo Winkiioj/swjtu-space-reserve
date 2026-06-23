@@ -39,9 +39,9 @@ function drawLineChart(ctx, canvas, data, opts = {}) {
 
   ctx.clearRect(0, 0, width, height)
 
-  // 字体大小用 px（Canvas 2D 不支持 rpx）
-  const labelFontSize = Math.max(9, Math.round(width / 35))
-  const legendFontSize = Math.max(10, Math.round(width / 30))
+  // 字体大小用 px（Canvas 2D 不支持 rpx），适当放大以保证可读性
+  const labelFontSize = Math.max(12, Math.round(width / 26))
+  const legendFontSize = Math.max(13, Math.round(width / 22))
 
   // ----- 网格和 Y 轴刻度 -----
   const yCount = opts.yLabelCount || 4
@@ -63,13 +63,19 @@ function drawLineChart(ctx, canvas, data, opts = {}) {
   }
 
   // ----- X 轴标签 -----
+  // 动态计算步长，保证每两个标签之间至少 70px，避免拥挤
+  const minLabelGapPx = 70
+  const xStep = labels.length > 1 ? chartW / (labels.length - 1) : chartW
+  const labelStep = Math.max(1, Math.ceil((labels.length * minLabelGapPx) / chartW))
   ctx.textAlign = 'center'
   ctx.textBaseline = 'top'
-  const xStep = labels.length > 1 ? chartW / (labels.length - 1) : chartW
-  const labelStep = Math.max(1, Math.floor(labels.length / 10))
+  ctx.font = String(Math.max(10, labelFontSize - 1)) + 'px sans-serif'
+  ctx.fillStyle = '#94a3b8'
   labels.forEach((label, i) => {
     if (i % labelStep !== 0 && i !== labels.length - 1) return
-    ctx.fillText(label, pad.left + xStep * i, pad.top + chartH + 10)
+    // 太长标签（如完整日期 "2026-06-15"）缩成 "06-15"，省空间
+    const text = label.length > 8 ? label.slice(5) : label
+    ctx.fillText(text, pad.left + xStep * i, pad.top + chartH + 12)
   })
 
   // ----- 绘制折线 -----

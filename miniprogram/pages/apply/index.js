@@ -309,18 +309,21 @@ Page({
   },
 
   async submitApplication() {
-    if (!this.data.canProceed || this.data.submitting) return
+    if (!this.data.canProceed || this._submitting) return
+    this._submitting = true
 
     const { selectedDate, selectedWeek, selectedLectures, capacity, rentalDetail, rentalDescription, selectedClassroomInfo } = this.data
 
     const dayOfWeek = this.getSystemDayOfWeek(selectedDate)
     if (dayOfWeek === -1) {
       wx.showToast({ title: '请选择周一至周五', icon: 'none' })
+      this._submitting = false
       return
     }
 
     if (!selectedClassroomInfo || !selectedClassroomInfo.classroomID) {
       wx.showToast({ title: '请先选择教室', icon: 'none' })
+      this._submitting = false
       return
     }
 
@@ -344,6 +347,7 @@ Page({
       }, 1200)
     } catch (err) {
       wx.showToast({ title: err.message || '提交失败', icon: 'none' })
+      this._submitting = false
     } finally {
       this.setData({ submitting: false })
     }

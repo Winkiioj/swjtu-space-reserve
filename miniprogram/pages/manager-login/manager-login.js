@@ -10,6 +10,10 @@ Page({
     this.setData({ userID: e.detail.value })
   },
 
+  goHome() {
+    wx.switchTab({ url: '/pages/index/index' })
+  },
+
   async doLogin() {
     const userID = this.data.userID.trim()
     if (!userID) {

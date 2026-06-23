@@ -9,7 +9,8 @@ Page({
     nickName: '',
     userID: '',
     identityText: '',
-    stats: { total: 0, approved: 0, pending: 0, rejected: 0 }
+    stats: { total: 0, approved: 0, pending: 0, rejected: 0 },
+    unreadNotifCount: 0
   },
 
   onLoad() { this.loadInfo() },
@@ -27,13 +28,16 @@ Page({
         identityText: this.idt(info.identity)
       })
       this.fetchStats()
+      this.fetchUnreadCount()
     } else {
       this.setData({
         isLoggedIn: false,
         isBound: false,
         avatar: '', nickName: '', userID: '',
-        stats: { total: 0, approved: 0, pending: 0, rejected: 0 }
+        stats: { total: 0, approved: 0, pending: 0, rejected: 0 },
+        unreadNotifCount: 0
       })
+      wx.removeTabBarBadge({ index: 3 })
     }
   },
 
@@ -58,6 +62,47 @@ Page({
     } catch (e) {}
   },
 
+  /** 获取未读通知数并更新 tabBar 红点 */
+  async fetchUnreadCount() {
+    const uid = auth.getUserId()
+    if (!uid) return
+    try {
+      const r = await api.notification.getUnreadCount(uid)
+      const count = (r && r.count) || 0
+      this.setData({ unreadNotifCount: count })
+      this._syncTabBarBadge(count)
+    } catch (e) {
+      console.error('[mine] fetchUnreadCount 失败:', e)
+    }
+  },
+
+  /** 同步 tabBar 红点 */
+  _syncTabBarBadge(count) {
+    if (count > 0) {
+      wx.setTabBarBadge({ index: 3, text: count > 99 ? '99+' : String(count) })
+    } else {
+      wx.removeTabBarBadge({ index: 3 })
+    }
+  },
+
+  // ===== 统计卡片点击 → 跳转申请列表（带状态筛选） =====
+
+  onStatTap(e) {
+    const tab = e.currentTarget.dataset.tab
+    wx.navigateTo({ url: '/pages/application/index?tab=' + tab })
+  },
+
+  // ===== 通知标记已读 =====
+
+  async markNotifRead(e) {
+    const id = e.currentTarget.dataset.id
+    if (!id) return
+    try {
+      await api.notification.markAsRead(id)
+      this.fetchUnreadCount()
+    } catch (e) {}
+  },
+
   onLogin() { wx.reLaunch({ url: '/pages/login/index' }) },
 
   onBind() {
@@ -75,6 +120,7 @@ Page({
       success: r => {
         if (r.confirm) {
           auth.logout()
+          wx.removeTabBarBadge({ index: 3 })
           wx.reLaunch({ url: '/pages/login/index' })
         }
       }
@@ -87,6 +133,8 @@ Page({
       wx.navigateTo({ url: '/pages/application/index' })
     } else if (key === 'reservations') {
       wx.navigateTo({ url: '/pages/my-reservations/my-reservations' })
+    } else if (key === 'notifications') {
+      wx.navigateTo({ url: '/pages/notifications/notifications' })
     } else if (key === 'favorites') {
       wx.showToast({ title: '功能开发中', icon: 'none' })
     } else if (key === 'help') {

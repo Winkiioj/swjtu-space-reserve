@@ -17,7 +17,8 @@
     "pages/admin/init-data/init-data",
     "pages/admin/notifications/notifications",
     "pages/admin/profile/profile",
-    "pages/admin/users/users"
+    "pages/admin/users/users",
+    "pages/notifications/notifications"
   ],
   "window": {
     "backgroundColor": "#f5f5f5",

@@ -3,7 +3,7 @@
   <view class="adm-card reset-card">
     <view class="adm-section-title">⚡ 一键重置测试环境</view>
     <text style="font-size: 26rpx; color: var(--adm-text-secondary); display: block; margin-bottom: 24rpx;">
-      清空并重建全部测试数据：教室(20间) + 用户(11人) + 申请(10条) + 座位(200个)。重置前请确保云函数已部署。
+      清空并重建全部测试数据：教室(20间) + 用户(11人) + 申请(10条) + 座位(180个)。重置前请确保云函数已部署。
     </text>
 
     <!-- 未开始 -->

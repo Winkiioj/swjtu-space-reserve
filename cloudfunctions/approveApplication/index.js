@@ -96,17 +96,50 @@ exports.main = async (event) => {
     const now = Date.now()
 
     // 更新申请
+    const updateData = {
+      rentalStatus: 1,
+      approverID: currentUserID,
+      approvedAt: now,
+      notificationSent: true,       // 立即发送通知
+      notificationSentAt: now,
+      reviewExpiresAt: now + REVIEW_EXPIRY_MS,  // 撤回截止时间
+      updatedAt: now
+    }
+    if (isAlternative) {
+      updateData.approvedClassroomId = targetClassroomId
+    }
     await db.collection('Applications').doc(applicationID).update({
-      data: {
-        rentalStatus: 1,
-        approverID: currentUserID,
-        approvedAt: now,
-        approvedClassroomId: isAlternative ? targetClassroomId : undefined,
-        notificationSent: false,      // 通知将在2小时后发送
-        reviewExpiresAt: now + REVIEW_EXPIRY_MS,  // 撤回截止时间
-        updatedAt: now
-      }
+      data: updateData
     })
+
+    // 标记原始"新申请"通知为已读（申请已处理，不再需要提醒）
+    try {
+      await db.collection('Notifications')
+        .where({ relatedId: applicationID, type: 'new_application' })
+        .update({ data: { isRead: true, updatedAt: now } })
+    } catch (e) {
+      console.warn('标记新申请通知失败:', e.message)
+    }
+
+    // 立即发送审核结果通知给申请人+管理员
+    try {
+      const lectureStr = application.rentLectures.map(l => l + 1).join(',')
+      const classroomName = classroom.classroomID || '教室'
+      await db.collection('Notifications').add({
+        data: {
+          targetUsers: [application.proposerID, 'admin'],
+          title: '✅ 教室审核通过通知',
+          content: `您好 ${application.proposerName}，您于 ${application.rentDate} 申请 ${classroomName}（${lectureStr}讲）的预约已通过审核，请按时使用。`,
+          type: 'review_result',
+          relatedId: applicationID,
+          isRead: false,
+          createdAt: now,
+          updatedAt: now
+        }
+      })
+    } catch (e) {
+      console.warn('发送审核结果通知失败:', e.message)
+    }
 
     // 更新教室矩阵
     await db.collection('Classrooms').doc(targetClassroomId).update({

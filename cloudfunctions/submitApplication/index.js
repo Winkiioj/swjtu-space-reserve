@@ -189,8 +189,26 @@ exports.main = async (event, context) => {
             }
         }
 
+        // ===== 防重复提交：同一用户 10s 内相同的申请视为重复 =====
+        const now = Date.now()
+        const recentDuplicate = await db.collection('Applications')
+          .where({
+            proposerID: userID,
+            classroomName: classroom.classroomID,
+            rentDate: rentDate,
+            rentLectures: rentLectures,
+            appliedAt: _.gte(now - 10000)
+          })
+          .count()
+        if (recentDuplicate.total > 0) {
+            return {
+                code: 400,
+                message: '请勿重复提交',
+                data: null
+            }
+        }
+
         // ===== 创建新申请 =====
-        const now = new Date().getTime()
         const applicationData = {
             classroomApplied: classroom._id,
             classroomName: classroom.classroomID,       // 冗余：教室号，如 "x1337"
@@ -223,11 +241,27 @@ exports.main = async (event, context) => {
             data: applicationData
         })
 
+        // ===== 创建新申请通知（通知管理员） =====
+        const lectureStr = rentLectures.map(l => l + 1).join(',')
+        const dayNames = ['一', '二', '三', '四', '五', '六', '日']
+        await db.collection('Notifications').add({
+          data: {
+            targetUsers: ['admin'],
+            title: '📋 新教室申请',
+            content: `${user.userName}（${user.userID}）申请了 ${classroom.classroomID}（${classroom.buildingBelong}），${rentDate} 周${dayNames[rentDayOfWeek]} 第${lectureStr}讲`,
+            type: 'new_application',
+            relatedId: result._id,
+            isRead: false,
+            createdAt: now,
+            updatedAt: now
+          }
+        })
+
         return {
             code: 0,
             message: '申请已提交，等待审核',
             data: {
-                applicationID: result.id,
+                applicationID: result._id,
                 status: 0,
                 appliedAt: now
             }

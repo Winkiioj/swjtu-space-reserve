@@ -228,37 +228,22 @@ const AdminAPI = {
 
   /** 获取管理员通知列表 */
   getAdminNotifications(page = 1, pageSize = 10) {
-    return callWithFallback('getUserNotifications', { userId: 'admin', limit: pageSize }, () => {
-      return mockGetAdminNotifications(page, pageSize)
-    })
+    return call('getUserNotifications', { userId: 'admin', limit: pageSize })
   },
 
   /** 获取管理员未读通知数 */
   getAdminUnreadCount() {
-    return callWithFallback('getUnreadNotificationCount', { userId: 'admin' }, () => {
-      return { count: mockGetAdminUnreadCount() }
-    })
+    return call('getUnreadNotificationCount', { userId: 'admin' })
   },
 
   /** 标记通知已读 */
   markNotificationRead(notificationId) {
-    // mock ID 本地标记（不调云函数，调了也查不到）
-    if (notificationId && notificationId.startsWith('notif_')) {
-      mockMarkReadInStore(notificationId)
-      return Promise.resolve({ code: 0 })
-    }
-    return callWithFallback('markNotificationRead', { notificationId }, () => {
-      return { code: 0 }
-    })
+    return call('markNotificationRead', { notificationId })
   },
 
   /** 全部标记已读 */
   markAllNotificationsRead() {
-    // 标记本地 mock store 中所有通知为已读
-    mockMarkAllReadInStore()
-    return callWithFallback('markAllNotificationsRead', { userId: 'admin' }, () => {
-      return { updatedCount: 0 }
-    })
+    return call('markAllNotificationsRead', { userId: 'admin' })
   },
 
   /** 获取所有用户（分页） */
@@ -531,111 +516,6 @@ function mockGetHeatmap() {
     matrix.push(row)
   }
   return { matrix, totalClassrooms: 48, maxRate: 0.85 }
-}
-
-// ==================== Mock 管理员通知数据 ====================
-
-/**
- * 生成管理员通知（混合未读/已读）
- */
-function mockGetAdminNotifications(page, pageSize) {
-  const all = [...getMockAdminNotifications()]
-  const sorted = all.sort((a, b) => b.createdAt - a.createdAt)
-  const start = (page - 1) * pageSize
-  return { data: sorted.slice(start, start + pageSize) }
-}
-
-function mockGetAdminUnreadCount() {
-  return getMockAdminNotifications().filter(n => !n.isRead).length
-}
-
-// ==================== Mock 管理员通知数据（单例，支持标记已读） ====================
-
-let _mockNotifStore = null
-
-function getMockAdminNotifications() {
-  if (_mockNotifStore) return _mockNotifStore
-
-  const now = Date.now()
-  const MIN = 60 * 1000
-  const HOUR = 60 * MIN
-
-  _mockNotifStore = [
-    {
-      _id: 'notif_admin_001',
-      title: '📋 新待审核申请',
-      content: '学生 张三 提交了教室 x1337 的预约申请（6月15日 第1-3讲）',
-      type: 'new_application',
-      relatedId: 'mock_app_005',
-      isRead: false,
-      createdAt: now - 30 * MIN,
-      updatedAt: now - 30 * MIN
-    },
-    {
-      _id: 'notif_admin_002',
-      title: '✅ 审核结果已发送',
-      content: '王凯的教室申请已通过审批，通知已自动发送',
-      type: 'review_sent',
-      relatedId: 'mock_app_001',
-      isRead: false,
-      createdAt: now - 40 * MIN,
-      updatedAt: now - 40 * MIN
-    },
-    {
-      _id: 'notif_admin_003',
-      title: '📋 新待审核申请',
-      content: '学生 李华 提交了教室 b2301 的预约申请（6月16日 第6-8讲）',
-      type: 'new_application',
-      relatedId: 'mock_app_006',
-      isRead: false,
-      createdAt: now - 2 * HOUR,
-      updatedAt: now - 2 * HOUR
-    },
-    {
-      _id: 'notif_admin_004',
-      title: '⏰ 撤回时限提醒',
-      content: '赵强的申请已通过50分钟，剩余约1小时10分钟可撤回',
-      type: 'revoke_reminder',
-      relatedId: 'mock_app_004',
-      isRead: false,
-      createdAt: now - 55 * MIN,
-      updatedAt: now - 55 * MIN
-    },
-    {
-      _id: 'notif_admin_005',
-      title: '📊 周报',
-      content: '本周共有 12 项教室预约，较上周增长 20%',
-      type: 'weekly_report',
-      relatedId: null,
-      isRead: true,
-      createdAt: now - 12 * HOUR,
-      updatedAt: now - 12 * HOUR
-    },
-    {
-      _id: 'notif_admin_006',
-      title: '❌ 审核未通过通知',
-      content: '赵强的教室申请未通过审核，原因：教室已被课程占用，通知已自动发送',
-      type: 'review_sent',
-      relatedId: 'mock_app_003',
-      isRead: true,
-      createdAt: now - 6 * HOUR,
-      updatedAt: now - 6 * HOUR
-    }
-  ]
-  return _mockNotifStore
-}
-
-/** Mock 标记单条通知已读 */
-function mockMarkReadInStore(notificationId) {
-  const all = getMockAdminNotifications()
-  const n = all.find(a => a._id === notificationId)
-  if (n) n.isRead = true
-}
-
-/** Mock 标记全部已读 */
-function mockMarkAllReadInStore() {
-  const all = getMockAdminNotifications()
-  all.forEach(n => { n.isRead = true })
 }
 
 // ==================== Mock 用户数据 ====================
