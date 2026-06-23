@@ -23,6 +23,11 @@
     </view>
   </view>
 
+  <view class="back-home" bindtap="goHome">
+    <text class="back-home-icon">🏠</text>
+    <text class="back-home-text">返回学生端首页</text>
+  </view>
+
   <view class="footer">
     <text>© 交大教室租借系统</text>
   </view>

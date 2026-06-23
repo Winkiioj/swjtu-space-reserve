@@ -21,21 +21,21 @@
     <view class="bind-btn" bindtap="onLogin">登录</view>
   </view>
 
-  <!-- 统计数据 -->
+  <!-- 统计数据（可点击跳转） -->
   <view class="stats" wx:if="{{isLoggedIn}}">
-    <view class="stat">
+    <view class="stat" bindtap="onStatTap" data-tab="all">
       <text class="num">{{stats.total}}</text>
       <text class="label">总申请</text>
     </view>
-    <view class="stat">
+    <view class="stat" bindtap="onStatTap" data-tab="approved">
       <text class="num green">{{stats.approved}}</text>
       <text class="label">已通过</text>
     </view>
-    <view class="stat">
+    <view class="stat" bindtap="onStatTap" data-tab="pending">
       <text class="num yellow">{{stats.pending}}</text>
       <text class="label">待审核</text>
     </view>
-    <view class="stat">
+    <view class="stat" bindtap="onStatTap" data-tab="rejected">
       <text class="num red">{{stats.rejected}}</text>
       <text class="label">已拒绝</text>
     </view>
@@ -61,6 +61,12 @@
   </view>
 
   <view class="menu">
+    <view class="menu-item" bindtap="onMenu" data-key="notifications">
+      <text class="mi-icon">🔔</text>
+      <text class="mi-text">消息通知</text>
+      <view wx:if="{{unreadNotifCount > 0}}" class="mi-badge">{{unreadNotifCount > 99 ? '99+' : unreadNotifCount}}</view>
+      <text class="mi-arrow">›</text>
+    </view>
     <view class="menu-item" bindtap="onMenu" data-key="help">
       <text class="mi-icon">❓</text>
       <text class="mi-text">帮助中心</text>

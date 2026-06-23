@@ -42,6 +42,9 @@ const AUDIT_ACTIONS = {
   IMPORT_SEATS: 'import_seats'
 }
 
+// 审批撤回窗口期（2小时）
+const REVIEW_EXPIRY_MS = 2 * 60 * 60 * 1000
+
 /**
  * 创建空状态矩阵（5天 × 13讲次/小时段，全0）
  * @returns {Array<Array<number>>}
@@ -66,6 +69,7 @@ module.exports = {
   MATRIX_LECTURES,
   MATRIX_VALUES,
   AUDIT_ACTIONS,
+  REVIEW_EXPIRY_MS,
   createEmptyMatrix,
   deepCopyMatrix
 }

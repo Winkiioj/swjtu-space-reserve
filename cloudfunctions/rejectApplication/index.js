@@ -27,10 +27,41 @@ exports.main = async (event) => {
         rejectionReason: reason || '',
         approverID: currentUserID,
         reviewedAt: now,
-        notificationSent: false,   // 标记需要发送拒绝通知
+        notificationSent: true,   // 立即发送通知
+        notificationSentAt: now,
         updatedAt: now
       }
     })
+
+    // 标记原始"新申请"通知为已读（申请已处理，不再需要提醒）
+    try {
+      await db.collection('Notifications')
+        .where({ relatedId: applicationId, type: 'new_application' })
+        .update({ data: { isRead: true, updatedAt: now } })
+    } catch (e) {
+      console.warn('标记新申请通知失败:', e.message)
+    }
+
+    // 立即发送审核结果通知给申请人+管理员
+    try {
+      const classroomName = app.classroomName || '教室'
+      const lectureStr = (app.rentLectures || []).map(l => l + 1).join(',')
+      const reasonStr = reason ? `原因：${reason}` : ''
+      await db.collection('Notifications').add({
+        data: {
+          targetUsers: [app.proposerID, 'admin'],
+          title: '❌ 教室审核未通过通知',
+          content: `您好 ${app.proposerName}，您于 ${app.rentDate} 申请 ${classroomName}（${lectureStr}讲）的预约未通过审核。${reasonStr}`,
+          type: 'review_result',
+          relatedId: applicationId,
+          isRead: false,
+          createdAt: now,
+          updatedAt: now
+        }
+      })
+    } catch (e) {
+      console.warn('发送审核结果通知失败:', e.message)
+    }
 
     // 审计日志
     logAudit(db, {

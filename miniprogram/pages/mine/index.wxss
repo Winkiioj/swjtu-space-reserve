@@ -26,15 +26,21 @@
   border-radius: 32rpx;
 }
 
-/* 统计 */
+/* 统计（可点击） */
 .stats { display: flex; margin: 0 24rpx 24rpx; }
 .stat {
   flex: 1; text-align: center; padding: 24rpx 0;
   background: #fff; border-radius: 12rpx; margin: 0 6rpx;
   box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.03);
+  position: relative;
+  transition: all 0.15s;
 }
 .stat:first-child { margin-left: 0; }
 .stat:last-child { margin-right: 0; }
+.stat:active {
+  background: #f5f7ff;
+  transform: scale(0.97);
+}
 .num { font-size: 40rpx; font-weight: 700; color: #1a1a1a; display: block; }
 .num.green { color: #52c41a; } .num.yellow { color: #faad14; } .num.red { color: #ff4d4f; }
 .label { font-size: 22rpx; color: #8c8c8c; margin-top: 8rpx; display: block; }
@@ -55,6 +61,11 @@
 .mi-icon { font-size: 32rpx; margin-right: 20rpx; width: 48rpx; text-align: center; }
 .mi-text { flex: 1; font-size: 28rpx; color: #333; }
 .mi-arrow { font-size: 28rpx; color: #c0c0c0; }
+.mi-badge {
+  min-width: 32rpx; height: 32rpx; line-height: 32rpx; text-align: center;
+  background: #ff4d4f; color: #fff; font-size: 20rpx; font-weight: 600;
+  border-radius: 16rpx; padding: 0 8rpx;
+}
 
 .menu-item.logout .mi-text { color: #ff4d4f; }
 

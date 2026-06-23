@@ -1,5 +1,5 @@
-<view class="adm-page adm-page-with-tabbar">
-  <!-- 欢迎卡片 -->
+<!-- ==================== 首页仪表盘 ==================== -->
+<view wx:if="{{currentTab === 'dashboard'}}" class="adm-page adm-page-with-tabbar">
   <view class="welcome-card">
     <view class="welcome-row">
       <view>
@@ -13,7 +13,6 @@
     </view>
   </view>
 
-  <!-- 统计卡片行 -->
   <view class="stats-grid">
     <view class="stat-card" bindtap="goToReview" style="border-top: 6rpx solid var(--adm-warning);">
       <text class="stat-num" style="color: var(--adm-warning);">{{pendingCount}}</text>
@@ -33,7 +32,6 @@
     </view>
   </view>
 
-  <!-- 申请趋势图 -->
   <view class="chart-card">
     <view class="chart-title">📈 申请趋势（近30天）</view>
     <view class="chart-container">
@@ -41,7 +39,6 @@
     </view>
   </view>
 
-  <!-- 教室占用热力图 -->
   <view class="chart-card">
     <view class="chart-title">🔥 教室占用热力图（本周）</view>
     <view class="heatmap-wrapper">
@@ -73,7 +70,6 @@
     </view>
   </view>
 
-  <!-- 快捷操作 -->
   <view class="chart-title" style="margin-top: 10rpx; padding-left: 10rpx;">⚡ 快捷操作</view>
   <view class="quick-menu" style="margin-bottom: 20rpx;">
     <view class="menu-item" bindtap="goToInit">
@@ -83,21 +79,128 @@
   </view>
 </view>
 
-<!-- 底部导航栏 -->
+<!-- ==================== 审核列表 ==================== -->
+<view wx:if="{{currentTab === 'review'}}" class="adm-page adm-page-with-tabbar">
+  <!-- 子 tab：待审核 / 已审核 -->
+  <view class="review-subtab">
+    <view class="review-subtab-item {{reviewType === 'pending' ? 'active' : ''}}" bindtap="switchReviewType" data-type="pending">待审核</view>
+    <view class="review-subtab-item {{reviewType === 'reviewed' ? 'active' : ''}}" bindtap="switchReviewType" data-type="reviewed">已审核</view>
+  </view>
+
+  <view class="search-bar">
+    <text class="s-icon">🔍</text>
+    <input class="s-input" placeholder="搜索申请人 / 教室 / 事由" bindinput="onSearchInput" value="{{keyword}}" confirm-type="search" />
+    <text wx:if="{{keyword}}" class="s-clear" bindtap="clearSearch">✕</text>
+  </view>
+
+  <view wx:for="{{showList}}" wx:key="_id" class="app-card" bindtap="goDetail" data-id="{{item._id}}">
+    <view class="app-card-top">
+      <view class="app-user">
+        <view class="app-avatar">{{item._initial}}</view>
+        <view class="app-user-info">
+          <text class="app-user-name">{{item.userName}}</text>
+          <text class="app-user-id">{{item._subtitle}}</text>
+        </view>
+      </view>
+      <view class="app-status">
+        <text wx:if="{{item._revokeText}}" class="tag-revoke">{{item._revokeText}}</text>
+        <text class="tag-status {{item._statusClass}}">{{item.statusText}}</text>
+      </view>
+    </view>
+    <view class="app-card-body">
+      <view class="app-info-item">
+        <text class="app-info-icon">🏫</text>
+        <text class="app-info-text">{{item.classroomName}}</text>
+      </view>
+      <view class="app-info-item">
+        <text class="app-info-icon">📅</text>
+        <text class="app-info-text">{{item._dateDisplay}}</text>
+      </view>
+      <view class="app-info-item" wx:if="{{item.rentalDetail}}">
+        <text class="app-info-icon">📝</text>
+        <text class="app-info-text app-info-detail">{{item.rentalDetail}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{reviewLoading}}" class="adm-loading">加载中...</view>
+  <view wx:if="{{!hasMore && hasData}}" class="adm-no-more">— 没有更多了 —</view>
+  <view wx:if="{{showEmpty && !reviewLoading}}" class="adm-empty"><text>{{emptyText}}</text></view>
+</view>
+
+<!-- ==================== 通知列表 ==================== -->
+<view wx:if="{{currentTab === 'notifications'}}" class="adm-page adm-page-with-tabbar">
+  <view class="notif-header">
+    <view class="notif-header-left">
+      <text class="notif-title">📬 通知消息</text>
+      <text wx:if="{{notifCountText}}" class="notif-unread-badge">{{notifCountText}}</text>
+    </view>
+    <view wx:if="{{unreadCount > 0}}" class="notif-mark-all" bindtap="markAllRead">全部标记已读</view>
+  </view>
+
+  <view wx:if="{{notifShowEmpty && !notifLoading}}" class="adm-empty">
+    <text style="font-size: 80rpx; margin-bottom: 20rpx;">🔔</text>
+    <text>{{notifEmptyText}}</text>
+  </view>
+
+  <view wx:for="{{notifications}}" wx:for-item="n" wx:key="_id" class="notif-item {{n._unreadClass}}" data-id="{{n._id}}" data-type="{{n.type}}" data-relatedid="{{n.relatedId}}" bindtap="handleNotificationTap">
+    <text class="notif-icon">{{n._icon}}</text>
+    <view class="notif-body">
+      <view class="notif-top">
+        <text class="notif-title-text">{{n.title}}</text>
+        <text wx:if="{{!n.isRead}}" class="notif-dot"></text>
+      </view>
+      <text class="notif-content">{{n.content}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{notifLoading}}" class="adm-loading">加载中...</view>
+  <view wx:if="{{!notifHasMore && notifications.length > 0}}" class="adm-no-more">— 没有更多了 —</view>
+</view>
+
+<!-- ==================== 个人中心 ==================== -->
+<view wx:if="{{currentTab === 'profile'}}" class="adm-page adm-page-with-tabbar">
+  <view class="profile-card">
+    <view class="profile-avatar">👤</view>
+    <view class="profile-info">
+      <text class="profile-name">{{userInfo.userName || '管理员'}}</text>
+      <text class="profile-role">管理员</text>
+      <text class="profile-id">{{_idText}}</text>
+    </view>
+  </view>
+
+  <view class="menu-list">
+    <view class="menu-item-row" bindtap="goToUsers">
+      <text class="menu-item-icon">👥</text>
+      <text class="menu-item-label">用户管理</text>
+      <text class="menu-item-arrow">›</text>
+    </view>
+    <view class="menu-item-row" bindtap="goToInit">
+      <text class="menu-item-icon">📦</text>
+      <text class="menu-item-label">数据导入</text>
+      <text class="menu-item-arrow">›</text>
+    </view>
+  </view>
+
+  <view class="logout-btn" bindtap="onLogout">退出登录</view>
+</view>
+
+<!-- ==================== 底部导航栏（所有 tab 共用） ==================== -->
 <view class="adm-tabbar">
-  <view class="adm-tabbar-item active" bindtap="goToDashboard">
+  <view class="adm-tabbar-item {{currentTab === 'dashboard' ? 'active' : ''}}" bindtap="goToDashboard">
     <text class="adm-tabbar-icon">📊</text>
     <text class="adm-tabbar-label">首页</text>
   </view>
-  <view class="adm-tabbar-item" bindtap="goToReview">
+  <view class="adm-tabbar-item {{currentTab === 'review' ? 'active' : ''}}" bindtap="goToReview">
     <text class="adm-tabbar-icon">📋</text>
     <text class="adm-tabbar-label">审核</text>
   </view>
-  <view class="adm-tabbar-item" bindtap="goToNotifications">
+  <view class="adm-tabbar-item {{currentTab === 'notifications' ? 'active' : ''}}" bindtap="goToNotifications">
     <text class="adm-tabbar-icon">🔔</text>
     <text class="adm-tabbar-label">通知</text>
+    <text wx:if="{{unreadCount > 0}}" class="tabbar-badge">{{unreadCount > 99 ? '99+' : unreadCount}}</text>
   </view>
-  <view class="adm-tabbar-item" bindtap="goToAdminProfile">
+  <view class="adm-tabbar-item {{currentTab === 'profile' ? 'active' : ''}}" bindtap="goToAdminProfile">
     <text class="adm-tabbar-icon">👤</text>
     <text class="adm-tabbar-label">我的</text>
   </view>

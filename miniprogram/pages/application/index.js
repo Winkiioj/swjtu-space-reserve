@@ -13,6 +13,10 @@ Page({
   },
 
   onLoad: function (options) {
+    // 支持从外部跳转时预选 tab（如从"我的"统计卡片跳转）
+    if (options.tab) {
+      this.setData({ activeTab: options.tab })
+    }
   },
 
   onShow: function () {

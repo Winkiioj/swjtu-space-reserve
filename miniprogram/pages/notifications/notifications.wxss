@@ -1,0 +1,39 @@
+.page { min-height: 100vh; background: #f5f6fa; padding: 24rpx; }
+
+.header {
+  display: flex; justify-content: space-between; align-items: center;
+  background: #fff; border-radius: 16rpx; padding: 24rpx 28rpx;
+  margin-bottom: 20rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.03);
+}
+.title { font-size: 32rpx; font-weight: 700; color: #1a1a1a; }
+.mark-all { font-size: 24rpx; color: #1677ff; padding: 8rpx 16rpx; }
+.mark-all:active { opacity: 0.6; }
+
+/* 通知项 */
+.notif-item {
+  display: flex; align-items: flex-start; gap: 16rpx;
+  background: #fff; border-radius: 14rpx; padding: 24rpx;
+  margin-bottom: 14rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.03);
+  position: relative;
+}
+.notif-item:active { opacity: 0.8; }
+.notif-item.unread { background: #f6f8ff; border-left: 6rpx solid #1677ff; }
+
+.n-icon { font-size: 36rpx; width: 48rpx; text-align: center; flex-shrink: 0; margin-top: 2rpx; }
+.n-body { flex: 1; min-width: 0; }
+.n-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6rpx; }
+.n-title { font-size: 28rpx; font-weight: 600; color: #1a1a1a; flex: 1; }
+.n-time { font-size: 22rpx; color: #c0c0c0; flex-shrink: 0; margin-left: 12rpx; }
+.n-content { font-size: 24rpx; color: #888; line-height: 1.5; display: block; }
+.n-dot {
+  position: absolute; top: 28rpx; right: 24rpx;
+  width: 14rpx; height: 14rpx; background: #1677ff; border-radius: 50%;
+}
+
+/* 空状态 */
+.empty { display: flex; flex-direction: column; align-items: center; padding: 160rpx 0; }
+.empty-icon { font-size: 80rpx; margin-bottom: 20rpx; opacity: 0.4; }
+.empty-text { font-size: 28rpx; color: #bbb; }
+
+.loading { text-align: center; padding: 40rpx; color: #b0b0b0; font-size: 26rpx; }
+.no-more { text-align: center; padding: 30rpx; color: #ccc; font-size: 24rpx; }

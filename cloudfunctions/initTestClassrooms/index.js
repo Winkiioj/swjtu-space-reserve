@@ -65,16 +65,32 @@ exports.main = async (event) => {
   if (clean) {
     const collections = ['Classrooms', 'Applications', 'Notifications']
     const stats = {}
+    const errors = []
     for (const name of collections) {
-      // 默认 get() 最多20条，对种子数据足够；生产环境需分页
-      const all = await db.collection(name).get()
-      let deleted = 0
-      for (const doc of all.data) {
-        await db.collection(name).doc(doc._id).remove()
-        deleted++
+      try {
+        let totalDeleted = 0
+        // 分页读取 + 批量删除，突破 .get() 的 20 条限制
+        while (true) {
+          const res = await db.collection(name).limit(100).get()
+          if (res.data.length === 0) break
+          const ids = res.data.map(d => d._id)
+          await db.collection(name).where({ _id: db.command.in(ids) }).remove()
+          totalDeleted += ids.length
+          console.log(`已清空 ${name}: ${totalDeleted} 条（本批 ${ids.length}）`)
+        }
+        stats[name] = totalDeleted
+      } catch (e) {
+        console.error(`清空 ${name} 失败:`, e.message)
+        errors.push(`${name}: ${e.message}`)
+        stats[name] = -1
       }
-      stats[name] = deleted
-      console.log(`已清空 ${name}: ${deleted} 条`)
+    }
+    if (errors.length > 0) {
+      return {
+        code: 500,
+        message: `清空部分失败: ${errors.join('; ')}`,
+        data: { cleaned: stats }
+      }
     }
     return {
       code: 0,
