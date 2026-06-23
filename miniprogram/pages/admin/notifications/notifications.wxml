@@ -1,0 +1,28 @@
+<view class="adm-page adm-page-with-tabbar">
+  <view class="notif-header">
+    <view class="notif-header-left">
+      <text class="notif-title">📬 通知消息</text>
+      <text wx:if="{{notifCountText}}" class="notif-unread-badge">{{notifCountText}}</text>
+    </view>
+    <view wx:if="{{unreadCount > 0}}" class="notif-mark-all" bindtap="markAllRead">全部标记已读</view>
+  </view>
+
+  <view wx:if="{{showEmpty && !loading}}" class="adm-empty">
+    <text style="font-size: 80rpx; margin-bottom: 20rpx;">🔔</text>
+    <text>{{emptyText}}</text>
+  </view>
+
+  <view wx:for="{{notifications}}" wx:for-item="n" wx:key="_id" class="notif-item {{n._unreadClass}}" data-id="{{n._id}}" bindtap="markAsRead">
+    <text class="notif-icon">{{n._icon}}</text>
+    <view class="notif-body">
+      <view class="notif-top">
+        <text class="notif-title-text">{{n.title}}</text>
+        <text wx:if="{{!n.isRead}}" class="notif-dot"></text>
+      </view>
+      <text class="notif-content">{{n.content}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="adm-loading">加载中...</view>
+  <view wx:if="{{!hasMore && notifications.length > 0}}" class="adm-no-more">— 没有更多了 —</view>
+</view>

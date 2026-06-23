@@ -1,0 +1,50 @@
+<view class="adm-page">
+  <view class="search-bar">
+    <text class="search-icon">🔍</text>
+    <input class="search-input" placeholder="搜索用户名 / 学号 / 院系" bindinput="onSearchInput" value="{{keyword}}" confirm-type="search" />
+    <text wx:if="{{keyword}}" class="search-clear" bindtap="clearSearch">✕</text>
+  </view>
+
+  <view class="filter-tabs">
+    <view class="{{allTabClass}}" bindtap="switchFilter" data-mode="all">
+      <text>全部用户</text>
+      <text class="filter-count">{{users.length}}</text>
+    </view>
+    <view class="{{blackTabClass}}" bindtap="switchFilter" data-mode="blacklisted">
+      <text>🚫 黑名单</text>
+      <text class="filter-count">{{blacklistedCount}}</text>
+    </view>
+  </view>
+
+  <view class="user-stats">
+    <text>共 <text class="stat-em">{{showList.length}}</text> 名用户</text>
+  </view>
+
+  <view wx:if="{{showBlacklistBanner}}" class="blacklist-empty">
+    <text>🎉 暂无黑名单成员</text>
+  </view>
+
+  <view wx:for="{{showList}}" wx:for-item="u" wx:key="_id" class="user-card">
+    <view class="user-card-top">
+      <view class="user-avatar {{u._avatarClass}}">{{u.userName ? u.userName[0] : '?'}}</view>
+      <view class="user-info">
+        <view class="user-name-row">
+          <text class="user-name">{{u.userName || '未知'}}</text>
+          <text class="user-tag {{u._tagClass}}">{{u._identityText}}</text>
+          <text wx:if="{{u._blackTag}}" class="user-tag tag-blacklist">{{u._blackTag}}</text>
+        </view>
+        <text class="user-detail">{{u.userID || '无学号'}} · {{u.department || '未填院系'}}</text>
+        <text class="user-detail">{{u.phone || '未填电话'}}</text>
+      </view>
+    </view>
+    <view wx:if="{{!u._isAdmin}}" class="user-card-actions">
+      <view class="action-btn {{u._btnClass}}" bindtap="toggleBlacklist" data-id="{{u._id}}">{{u._btnText}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="adm-loading">加载中...</view>
+  <view wx:if="{{!hasMore && showList.length > 0}}" class="adm-no-more">— 没有更多了 —</view>
+  <view wx:if="{{showEmpty && !showBlacklistBanner && !loading}}" class="adm-empty">
+    <text>{{emptyText}}</text>
+  </view>
+</view>

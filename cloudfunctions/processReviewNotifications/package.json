@@ -1,0 +1,9 @@
+{
+  "name": "processReviewNotifications",
+  "version": "1.0.0",
+  "description": "处理审核结果通知的定时任务（审批通过2小时后发送通知）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

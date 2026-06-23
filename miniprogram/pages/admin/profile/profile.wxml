@@ -1,0 +1,48 @@
+<view class="adm-page adm-page-with-tabbar">
+  <!-- 管理员信息卡片 -->
+  <view class="profile-card">
+    <view class="profile-avatar">👤</view>
+    <view class="profile-info">
+      <text class="profile-name">{{userInfo.userName || '管理员'}}</text>
+      <text class="profile-role">管理员</text>
+      <text class="profile-id">{{_idText}}</text>
+    </view>
+  </view>
+
+  <!-- 菜单列表 -->
+  <view class="menu-list">
+    <view class="menu-item-row" bindtap="goToUsers">
+      <text class="menu-item-icon">👥</text>
+      <text class="menu-item-label">用户管理</text>
+      <text class="menu-item-arrow">›</text>
+    </view>
+    <view class="menu-item-row" bindtap="goToInit">
+      <text class="menu-item-icon">📦</text>
+      <text class="menu-item-label">数据导入</text>
+      <text class="menu-item-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="logout-btn" bindtap="onLogout">退出登录</view>
+</view>
+
+<!-- 底部导航栏 -->
+<view class="adm-tabbar">
+  <view class="adm-tabbar-item" bindtap="goToDashboard">
+    <text class="adm-tabbar-icon">📊</text>
+    <text class="adm-tabbar-label">首页</text>
+  </view>
+  <view class="adm-tabbar-item" bindtap="goToReview">
+    <text class="adm-tabbar-icon">📋</text>
+    <text class="adm-tabbar-label">审核</text>
+  </view>
+  <view class="adm-tabbar-item" bindtap="goToNotifications">
+    <text class="adm-tabbar-icon">🔔</text>
+    <text class="adm-tabbar-label">通知</text>
+  </view>
+  <view class="adm-tabbar-item active" bindtap="goToAdminProfile">
+    <text class="adm-tabbar-icon">👤</text>
+    <text class="adm-tabbar-label">我的</text>
+  </view>
+</view>

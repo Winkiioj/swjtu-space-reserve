@@ -13,18 +13,34 @@ const db = cloud.database()
 
 /**
  * 获取申请详情
+ * 先用 _id 直接查，失败则用 applicationID 字段查
  */
 async function getApplicationInfo(applicationID) {
+    // 方式1: 用 _id 直接查 (.doc() 返回单对象，不是数组)
     try {
         const result = await db.collection('Applications')
             .doc(applicationID)
             .get()
-
-        return result.data.length > 0 ? result.data[0] : null
+        if (result && result.data && result.data._id) {
+            return result.data
+        }
     } catch (err) {
-        console.error('获取申请详情失败:', err)
-        return null
+        console.log('_id 直查失败，改用字段查询:', err.message)
     }
+
+    // 方式2: 用 applicationID 字段查 (.where() 返回数组)
+    try {
+        const result = await db.collection('Applications')
+            .where({ applicationID: applicationID })
+            .get()
+        if (result && result.data && result.data.length > 0) {
+            return result.data[0]
+        }
+    } catch (err) {
+        console.error('字段查询也失败:', err)
+    }
+
+    return null
 }
 
 /**
@@ -35,8 +51,11 @@ async function getClassroomInfo(classroomID) {
         const result = await db.collection('Classrooms')
             .doc(classroomID)
             .get()
-
-        return result.data.length > 0 ? result.data[0] : null
+        // .doc() 返回单对象 {data: {...}}
+        if (result && result.data && result.data._id) {
+            return result.data
+        }
+        return null
     } catch (err) {
         console.error('获取教室信息失败:', err)
         return null
@@ -66,10 +85,11 @@ function restoreMatrixToAvailable(matrix, dayOfWeek, lectures) {
 
 exports.main = async (event, context) => {
     try {
-        const { applicationID, cancelReason = '' } = event
+        const { applicationId, applicationID, cancelReason = '' } = event
+        const appId = applicationID || applicationId  // 兼容两种命名
 
         // ===== 参数校验 =====
-        if (!applicationID) {
+        if (!appId) {
             return {
                 code: 400,
                 message: '申请ID不能为空',
@@ -78,7 +98,7 @@ exports.main = async (event, context) => {
         }
 
         // ===== 获取申请详情 =====
-        const application = await getApplicationInfo(applicationID)
+        const application = await getApplicationInfo(appId)
         if (!application) {
             return {
                 code: 404,
@@ -140,7 +160,7 @@ exports.main = async (event, context) => {
 
         // ===== 更新申请状态为已取消(3) =====
         await db.collection('Applications')
-            .doc(applicationID)
+            .doc(appId)
             .update({
                 data: {
                     rentalStatus: 3,  // 已取消
@@ -153,7 +173,7 @@ exports.main = async (event, context) => {
             code: 0,
             message: '申请已取消',
             data: {
-                applicationID: applicationID,
+                applicationID: appId,
                 status: 3,
                 classroomRestored: classroomRestored,
                 updatedAt: now

@@ -1,0 +1,41 @@
+@import '../../../styles/admin-theme.wxss';
+
+.alt-item {
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid var(--adm-border);
+}
+
+.alt-item:last-child {
+  border-bottom: none;
+}
+
+.alt-info {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.alt-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: var(--adm-text-primary);
+  background: var(--adm-primary-light);
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+}
+
+.alt-capacity {
+  font-size: 24rpx;
+  color: var(--adm-text-secondary);
+}
+
+.action-buttons {
+  margin-top: 40rpx;
+  padding-bottom: 40rpx;
+}
+
+/* ========== 撤回倒计时 ========== */
+.adm-text-expired {
+  color: var(--adm-danger) !important;
+  font-weight: 500;
+}

@@ -1,0 +1,198 @@
+/* 教室预约页 - 简洁风格 */
+.page { min-height: 100vh; background: #f5f6fa; padding-bottom: 140rpx; }
+
+/* 步骤指示器 */
+.step-bar {
+  display: flex; align-items: center; justify-content: center;
+  padding: 32rpx 48rpx; background: #fff;
+}
+.step { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+.step::after {
+  content: ''; position: absolute; top: 24rpx; left: calc(50% + 28rpx);
+  width: calc(100% - 56rpx); height: 3rpx; background: #e8e8e8;
+}
+.step:last-child::after { display: none; }
+.step.on::after { background: #1677ff; }
+.step-dot {
+  width: 48rpx; height: 48rpx; border-radius: 50%;
+  background: #e8e8e8; color: #999; font-size: 24rpx; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 8rpx; transition: all 0.25s;
+}
+.step.on .step-dot { background: #1677ff; color: #fff; }
+.step-label { font-size: 22rpx; color: #999; }
+.step.on .step-label { color: #1677ff; }
+
+/* 内容区 */
+.body { padding: 24rpx; }
+
+/* 卡片 */
+.card {
+  background: #fff; border-radius: 16rpx; padding: 28rpx 24rpx;
+  margin-bottom: 20rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.03);
+}
+.card.center { display: flex; flex-direction: column; align-items: center; padding: 64rpx 24rpx; }
+.card-title { font-size: 30rpx; font-weight: 600; color: #1a1a1a; display: block; margin-bottom: 20rpx; }
+
+/* 表单 */
+.f-item { margin-bottom: 28rpx; }
+.f-item:last-child { margin-bottom: 0; }
+.f-label { font-size: 26rpx; color: #666; display: block; margin-bottom: 14rpx; }
+.f-label.required::after { content: ' *'; color: #f5222d; }
+
+/* 分段选择器 */
+.seg { display: flex; gap: 16rpx; }
+.seg-item {
+  flex: 1; height: 80rpx; display: flex; align-items: center; justify-content: center;
+  background: #f5f5f5; border-radius: 12rpx; font-size: 28rpx; color: #666;
+  transition: all 0.2s;
+}
+.seg-item.on { background: #1677ff; color: #fff; }
+
+/* 日期选择器 */
+.picker {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 88rpx; padding: 0 24rpx; background: #f5f5f5; border-radius: 12rpx;
+  font-size: 28rpx; color: #333;
+}
+.ph { color: #bbb; }
+.arrow { font-size: 36rpx; color: #c0c0c0; }
+
+/* 讲次网格 */
+.lec-grid { display: flex; flex-wrap: wrap; gap: 12rpx; }
+.lec {
+  width: calc((100% - 48rpx) / 5); padding: 16rpx 0;
+  background: #f5f5f5; border-radius: 12rpx; text-align: center;
+  transition: all 0.15s;
+}
+.lec.picked { background: #1677ff; }
+.lec-label { font-size: 24rpx; color: #333; display: block; font-weight: 500; }
+.lec-time { font-size: 20rpx; color: #999; display: block; margin-top: 2rpx; }
+.lec.picked .lec-label, .lec.picked .lec-time { color: #fff; }
+
+/* 人数步进器 */
+.stepper { display: flex; align-items: center; justify-content: center; gap: 8rpx; }
+.stepper-btn {
+  width: 64rpx; height: 64rpx; border-radius: 12rpx;
+  background: #f5f5f5; color: #666; font-size: 28rpx; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+.stepper-btn:active { background: #e8e8e8; }
+.stepper-val { font-size: 30rpx; font-weight: 600; color: #1a1a1a; min-width: 100rpx; text-align: center; }
+
+/* 筛选栏 */
+.filter-bar {
+  display: flex; align-items: center; gap: 12rpx;
+  padding: 0 24rpx 16rpx; overflow-x: auto; white-space: nowrap;
+}
+.fbar-item {
+  flex-shrink: 0; padding: 14rpx 24rpx; border-radius: 32rpx;
+  background: #fff; color: #666; font-size: 24rpx; box-shadow: 0 1rpx 4rpx rgba(0,0,0,0.04);
+  transition: all 0.2s;
+}
+.fbar-item.on { background: #1677ff; color: #fff; }
+
+/* 高级筛选面板 */
+.filter-adv { margin: 0 24rpx 16rpx; background: #fff; border-radius: 16rpx; overflow: hidden; box-shadow: 0 1rpx 4rpx rgba(0,0,0,0.04); }
+.filter-adv-head {
+  display: flex; align-items: center; padding: 20rpx 24rpx;
+  gap: 12rpx;
+}
+.filter-adv-label { font-size: 26rpx; color: #333; font-weight: 500; flex-shrink: 0; }
+.filter-adv-tag { font-size: 20rpx; color: #1677ff; background: #e6f0ff; padding: 4rpx 14rpx; border-radius: 20rpx; flex: 1; }
+.filter-adv-arrow { font-size: 22rpx; color: #999; flex-shrink: 0; transition: transform 0.2s; }
+.filter-adv-arrow.open { transform: rotate(180deg); }
+
+.filter-adv-body { border-top: 1rpx solid #f0f0f0; padding: 20rpx 24rpx; }
+
+.filter-row { margin-bottom: 20rpx; }
+.filter-row:last-child { margin-bottom: 0; }
+.filter-row-label { font-size: 24rpx; color: #999; display: block; margin-bottom: 12rpx; }
+.filter-row-scroll { display: flex; gap: 12rpx; white-space: nowrap; }
+
+/* 筛选芯片 */
+.fchip {
+  flex-shrink: 0; padding: 12rpx 22rpx; border-radius: 32rpx;
+  background: #f5f5f5; color: #666; font-size: 24rpx;
+  display: inline-flex; align-items: center; gap: 4rpx;
+  transition: all 0.15s;
+}
+.fchip.on { background: #1677ff; color: #fff; }
+.fchip-multi { white-space: nowrap; }
+
+/* 重置 */
+.filter-reset-row { border-top: 1rpx solid #f0f0f0; padding-top: 16rpx; margin-top: 4rpx; }
+.filter-reset { font-size: 24rpx; color: #f5222d; }
+
+/* 教室列表头 */
+.card-header-bar { padding: 0 24rpx 16rpx; }
+.count { font-size: 24rpx; color: #999; }
+
+/* 教室卡片 */
+.room-card { margin: 0 24rpx 12rpx; transition: all 0.15s; }
+.room-card.picked { border: 2rpx solid #1677ff; background: #f6f9ff; }
+.room-main { display: flex; align-items: center; justify-content: space-between; }
+.room-info { flex: 1; }
+.room-name { font-size: 28rpx; font-weight: 600; color: #1a1a1a; display: block; }
+.room-desc { font-size: 22rpx; color: #999; display: block; margin-top: 6rpx; }
+.room-right { display: flex; flex-direction: column; align-items: flex-end; margin-left: 16rpx; }
+.room-cap { font-size: 26rpx; font-weight: 600; color: #333; margin-bottom: 12rpx; }
+.check-box {
+  width: 40rpx; height: 40rpx; border-radius: 50%;
+  border: 2rpx solid #d9d9d9; display: flex; align-items: center; justify-content: center;
+  font-size: 24rpx; color: #fff; transition: all 0.2s;
+}
+.check-box.on { background: #1677ff; border-color: #1677ff; }
+.room-tags { display: flex; margin-top: 12rpx; gap: 8rpx; flex-wrap: wrap; }
+.tag { font-size: 20rpx; color: #1677ff; background: #e6f0ff; padding: 4rpx 12rpx; border-radius: 6rpx; }
+.tag-type { color: #0958d9; background: #f0f5ff; font-weight: 500; }
+.tag-facility { color: #389e0d; background: #f6ffed; }
+
+/* 加载/空状态 */
+.loading-text { font-size: 26rpx; color: #999; }
+.empty-icon { font-size: 64rpx; margin-bottom: 16rpx; }
+.empty-text { font-size: 28rpx; color: #999; margin-bottom: 8rpx; }
+.empty-hint { font-size: 24rpx; color: #c0c0c0; }
+
+/* 确认信息 */
+.summary { margin-bottom: 28rpx; }
+.sum-row { display: flex; justify-content: space-between; padding: 16rpx 0; border-bottom: 1rpx solid #f5f5f5; }
+.sum-row:last-child { border-bottom: none; }
+.sum-k { font-size: 26rpx; color: #999; }
+.sum-v { font-size: 26rpx; color: #333; text-align: right; flex: 1; margin-left: 24rpx; }
+
+/* 输入框 */
+.f-input {
+  width: 100%; height: 88rpx; padding: 0 24rpx; background: #f5f5f5;
+  border-radius: 12rpx; font-size: 28rpx; color: #333; box-sizing: border-box;
+}
+.f-textarea {
+  width: 100%; min-height: 160rpx; padding: 20rpx 24rpx; background: #f5f5f5;
+  border-radius: 12rpx; font-size: 28rpx; color: #333; box-sizing: border-box;
+}
+
+/* 底部按钮 */
+.foot {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; gap: 16rpx; padding: 20rpx 24rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: #fff; box-shadow: 0 -2rpx 16rpx rgba(0,0,0,0.05);
+}
+.btn-back {
+  width: 160rpx; height: 88rpx; border-radius: 16rpx;
+  background: #f5f5f5; color: #666; font-size: 28rpx;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-go {
+  flex: 1; height: 88rpx; border-radius: 16rpx;
+  background: #1677ff; color: #fff; font-size: 30rpx; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-go[disabled] { background: #c0c0c0; color: #fff; }
+.btn-submit {
+  flex: 1; height: 88rpx; border-radius: 16rpx;
+  background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%);
+  color: #fff; font-size: 30rpx; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+}
+.btn-submit[disabled] { opacity: 0.5; }

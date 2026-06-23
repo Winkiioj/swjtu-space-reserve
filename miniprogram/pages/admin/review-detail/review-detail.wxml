@@ -1,0 +1,76 @@
+<view class="adm-page">
+  <view class="adm-card">
+    <view class="adm-section-title">申请信息</view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请人</text>
+      <text class="adm-info-value">{{applicantName}} ({{application.proposerID}})</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">联系电话</text>
+      <text class="adm-info-value">{{applicantPhone}}</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请教室</text>
+      <text class="adm-info-value">{{classroomInfo.buildingBelong}} {{classroomInfo.classroomID}}</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">教室容量</text>
+      <text class="adm-info-value">{{classroomInfo.containNumber}} 人</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">预计人数</text>
+      <text class="adm-info-value">{{application.expectedAttendeeCount}} 人</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请日期</text>
+      <text class="adm-info-value">{{application.rentDate}} 周{{application.rentDayOfWeek + 1}}</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">申请讲次</text>
+      <text class="adm-info-value">{{lecturesStr}}</text>
+    </view>
+    <view class="adm-info-row">
+      <text class="adm-info-label">使用事由</text>
+      <text class="adm-info-value">{{application.rentalDetail || '未填写'}}</text>
+    </view>
+    <view wx:if="{{application.rentalDescription}}" class="adm-info-row">
+      <text class="adm-info-label">补充说明</text>
+      <text class="adm-info-value">{{application.rentalDescription}}</text>
+    </view>
+    <view wx:if="{{isReviewed}}" class="adm-info-row">
+      <text class="adm-info-label">审核状态</text>
+      <text class="adm-info-value"><text class="adm-badge {{statusBadgeClass}}">{{statusText}}</text></text>
+    </view>
+    <view wx:if="{{application.rentalStatus === 2 && application.rejectionReason}}" class="adm-info-row">
+      <text class="adm-info-label">拒绝原因</text>
+      <text class="adm-info-value">{{application.rejectionReason}}</text>
+    </view>
+    <view wx:if="{{application.rentalStatus === 1 && revokeCountdown}}" class="adm-info-row">
+      <text class="adm-info-label">撤回倒计时</text>
+      <text class="adm-info-value {{canRevoke ? '' : 'adm-text-expired'}}">{{revokeCountdown}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{!isReviewed}}" class="adm-card">
+    <view class="adm-section-title">推荐替代教室</view>
+    <view wx:for="{{alternatives}}" wx:key="index" class="alt-item">
+      <view class="alt-info">
+        <text class="alt-name">{{item.buildingBelong}} {{item.classroomID}}</text>
+        <text class="alt-capacity">容量 {{item.containNumber}} 人</text>
+      </view>
+    </view>
+    <view wx:if="{{alternatives.length === 0}}" class="adm-empty" style="padding: 30rpx 0;">
+      <text>暂无其他可用教室</text>
+    </view>
+  </view>
+
+  <view class="action-buttons">
+    <block wx:if="{{!isReviewed}}">
+      <view class="adm-btn adm-btn-primary {{btnApproving ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="onApprove">通过申请</view>
+      <view class="adm-btn adm-btn-danger {{processing ? 'adm-btn-disabled' : ''}}" hover-class="adm-btn-active" bindtap="onReject">拒绝申请</view>
+    </block>
+    <block wx:else>
+      <view class="adm-btn {{canRevoke ? 'adm-btn-warning' : 'adm-btn-disabled'}}" hover-class="adm-btn-active" bindtap="onRevoke">{{canRevoke ? '撤销审核' : '已过撤回时限'}}</view>
+    </block>
+  </view>
+</view>

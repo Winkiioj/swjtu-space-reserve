@@ -1,0 +1,9 @@
+{
+  "name": "clearTestData",
+  "version": "1.0.0",
+  "description": "清理测试数据 — 支持按模式清理 Applications 表中的旧版/全部/指定状态/过期申请",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

@@ -1,0 +1,45 @@
+<view class="adm-page">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <text class="s-icon">🔍</text>
+    <input class="s-input" placeholder="搜索申请人 / 教室 / 事由" bindinput="onSearchInput" value="{{keyword}}" confirm-type="search" />
+    <text wx:if="{{keyword}}" class="s-clear" bindtap="clearSearch">✕</text>
+  </view>
+  <view wx:if="{{keyword}}" class="s-hint">搜索"{{keyword}}" — 共 {{filtered.length}} 条结果</view>
+
+  <view wx:for="{{showList}}" wx:key="_id" class="app-card" bindtap="goDetail" data-id="{{item._id}}">
+    <view class="app-card-top">
+      <view class="app-user">
+        <view class="app-avatar">{{item._initial}}</view>
+        <view class="app-user-info">
+          <text class="app-user-name">{{item.userName}}</text>
+          <text class="app-user-id">{{item._subtitle}}</text>
+        </view>
+      </view>
+      <view class="app-status">
+        <text wx:if="{{item._revokeText}}" class="tag-revoke">{{item._revokeText}}</text>
+        <text class="tag-status {{item._statusClass}}">{{item.statusText}}</text>
+      </view>
+    </view>
+    <view class="app-card-body">
+      <view class="app-info-item">
+        <text class="app-info-icon">🏫</text>
+        <text class="app-info-text">{{item.classroomName}}</text>
+      </view>
+      <view class="app-info-item">
+        <text class="app-info-icon">📅</text>
+        <text class="app-info-text">{{item._dateDisplay}}</text>
+      </view>
+      <view class="app-info-item" wx:if="{{item.rentalDetail}}">
+        <text class="app-info-icon">📝</text>
+        <text class="app-info-text app-info-detail">{{item.rentalDetail}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="adm-loading">加载中...</view>
+  <view wx:if="{{!hasMore && hasData}}" class="adm-no-more">— 没有更多了 —</view>
+  <view wx:if="{{showEmpty && !loading}}" class="adm-empty">
+    <text>{{emptyText}}</text>
+  </view>
+</view>

@@ -1,0 +1,10 @@
+{
+  "triggers": [
+    {
+      "name": "expireReservations",
+      "type": "timer",
+      "config": "0 */5 * * * * *"
+    }
+  ],
+  "timeout": 60
+}

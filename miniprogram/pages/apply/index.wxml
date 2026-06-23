@@ -1,0 +1,245 @@
+<!-- 教室预约 - 三步向导 -->
+<view class="page">
+  <!-- 步骤指示器 -->
+  <view class="step-bar">
+    <view class="step {{currentStep >= index ? 'on' : ''}}" wx:for="{{steps}}" wx:key="idx">
+      <view class="step-dot">{{item.num}}</view>
+      <text class="step-label">{{item.label}}</text>
+    </view>
+  </view>
+
+  <!-- ==================== 第一步：选择时间 ==================== -->
+  <view wx:if="{{currentStep === 0}}" class="body">
+    <view class="card">
+      <!-- 周 -->
+      <view class="f-item">
+        <text class="f-label">选择周</text>
+        <view class="seg">
+          <view class="seg-item {{selectedWeek === 'this' ? 'on' : ''}}" bindtap="onWeekSelect" data-week="this">本周</view>
+          <view class="seg-item {{selectedWeek === 'next' ? 'on' : ''}}" bindtap="onWeekSelect" data-week="next">下周</view>
+        </view>
+      </view>
+
+      <!-- 日期 -->
+      <view class="f-item">
+        <text class="f-label">选择日期</text>
+        <picker mode="date" value="{{selectedDate}}" bindchange="onDateChange" start="{{dateRange.start}}" end="{{dateRange.end}}">
+          <view class="picker">
+            <text class="{{selectedDate ? '' : 'ph'}}">{{selectedDate ? selectedDate + ' ' + dayOfWeekText : '请选择日期'}}</text>
+            <text class="arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 讲次 -->
+      <view class="f-item">
+        <text class="f-label">选择讲次（多选，需连续）</text>
+        <view class="lec-grid">
+          <view
+            class="lec {{lecturePicked[item.index] ? 'picked' : ''}}"
+            wx:for="{{lectures}}"
+            wx:key="index"
+            bindtap="onLectureToggle"
+            data-index="{{item.index}}"
+          >
+            <text class="lec-label">{{item.label}}</text>
+            <text class="lec-time">{{item.time}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 人数 -->
+      <view class="f-item">
+        <text class="f-label">预计人数</text>
+        <view class="stepper">
+          <view class="stepper-btn" bindtap="onCapacityChange" data-delta="-5">−5</view>
+          <view class="stepper-btn" bindtap="onCapacityChange" data-delta="-1">−1</view>
+          <text class="stepper-val">{{capacity}} 人</text>
+          <view class="stepper-btn" bindtap="onCapacityChange" data-delta="1">+1</view>
+          <view class="stepper-btn" bindtap="onCapacityChange" data-delta="5">+5</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 第二步：选择教室 ==================== -->
+  <view wx:if="{{currentStep === 1}}" class="body">
+
+    <!-- 楼栋筛选（一级） -->
+    <view class="filter-bar">
+      <view class="fbar-item {{selectedBuilding === '' ? 'on' : ''}}" bindtap="onBuildingSelect" data-building="">全部楼栋</view>
+      <view
+        class="fbar-item {{selectedBuilding === item.id ? 'on' : ''}}"
+        wx:for="{{buildings}}"
+        wx:key="id"
+        bindtap="onBuildingSelect"
+        data-building="{{item.id}}"
+      >{{item.name}}</view>
+    </view>
+
+    <!-- 高级筛选面板 -->
+    <view class="filter-adv">
+      <view class="filter-adv-head" bindtap="toggleFilter">
+        <text class="filter-adv-label">🔍 高级筛选</text>
+        <view class="filter-adv-tag" wx:if="{{selectedRoomType || selectedFloor > 0 || selectedFacilities.length > 0}}">
+          {{filterCount}} 项已选
+        </view>
+        <text class="filter-adv-arrow {{showFilter ? 'open' : ''}}">{{showFilter ? '▲' : '▼'}}</text>
+      </view>
+
+      <view wx:if="{{showFilter}}" class="filter-adv-body">
+        <!-- 教室类型 -->
+        <view class="filter-row">
+          <text class="filter-row-label">类型</text>
+          <scroll-view scroll-x class="filter-row-scroll">
+            <view class="fchip {{selectedRoomType === '' ? 'on' : ''}}" bindtap="onRoomTypeSelect" data-type="">全部</view>
+            <view
+              class="fchip {{selectedRoomType === item.value ? 'on' : ''}}"
+              wx:for="{{roomTypes}}"
+              wx:key="value"
+              wx:if="{{item.value !== ''}}"
+              bindtap="onRoomTypeSelect"
+              data-type="{{item.value}}"
+            >{{item.label}}</view>
+          </scroll-view>
+        </view>
+
+        <!-- 楼层 -->
+        <view class="filter-row">
+          <text class="filter-row-label">楼层</text>
+          <scroll-view scroll-x class="filter-row-scroll">
+            <view class="fchip {{selectedFloor === 0 ? 'on' : ''}}" bindtap="onFloorSelect" data-floor="0">全部</view>
+            <view
+              class="fchip {{selectedFloor === item ? 'on' : ''}}"
+              wx:for="{{floors}}"
+              wx:key="*this"
+              bindtap="onFloorSelect"
+              data-floor="{{item}}"
+            >{{item}}F</view>
+          </scroll-view>
+        </view>
+
+        <!-- 设施 -->
+        <view class="filter-row">
+          <text class="filter-row-label">设施</text>
+          <view class="filter-row-scroll" style="flex-wrap: wrap; display: flex; gap: 10rpx;">
+            <view
+              class="fchip fchip-multi {{facilityPicked[item.key] ? 'on' : ''}}"
+              wx:for="{{facilities}}"
+              wx:key="key"
+              bindtap="onFacilityToggle"
+              data-key="{{item.key}}"
+            >{{facilityPicked[item.key] ? '✓ ' : ''}}{{item.label}}</view>
+          </view>
+        </view>
+
+        <!-- 重置 -->
+        <view class="filter-reset-row" wx:if="{{selectedRoomType || selectedFloor > 0 || selectedFacilities.length > 0}}">
+          <text class="filter-reset" bindtap="resetFilter">↺ 重置全部筛选</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 加载中 -->
+    <view class="card center" wx:if="{{loading}}">
+      <text class="loading-text">正在查找可用教室…</text>
+    </view>
+
+    <!-- 空结果 -->
+    <view class="card center" wx:elif="{{classrooms.length === 0 && !loading}}">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">没有符合条件的教室</text>
+      <text class="empty-hint">试试调整时间、讲次、人数或筛选条件</text>
+    </view>
+
+    <!-- 教室列表 -->
+    <block wx:else>
+      <view class="card-header-bar">
+        <text class="count">共 {{classrooms.length}} 间可用</text>
+      </view>
+      <view
+        class="card room-card {{selectedClassroom === item._id ? 'picked' : ''}}"
+        wx:for="{{classrooms}}"
+        wx:key="_id"
+        bindtap="onClassroomSelect"
+        data-id="{{item._id}}"
+      >
+        <view class="room-main">
+          <view class="room-info">
+            <text class="room-name">{{item.buildingBelong}} {{item.classroomID}}</text>
+            <text class="room-desc">{{item.description || '暂无描述'}}</text>
+          </view>
+          <view class="room-right">
+            <text class="room-cap">{{item.containNumber}} 人</text>
+            <view class="check-box {{selectedClassroom === item._id ? 'on' : ''}}">
+              <text wx:if="{{selectedClassroom === item._id}}">✓</text>
+            </view>
+          </view>
+        </view>
+        <!-- 教室标签：类型 + 楼层 + 设施 -->
+        <view class="room-tags" wx:if="{{item.roomType || item.floor}}">
+          <text class="tag tag-type" wx:if="{{item.roomType}}">{{item.roomType}}</text>
+          <text class="tag" wx:if="{{item.floor}}">{{item.floor}}F</text>
+          <text class="tag tag-facility" wx:for="{{item.facilities}}" wx:for-item="f" wx:key="*this" wx:if="{{item.facilities && item.facilities.length}}">{{f}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <!-- ==================== 第三步：确认提交 ==================== -->
+  <view wx:if="{{currentStep === 2}}" class="body">
+    <view class="card">
+      <text class="card-title">确认信息</text>
+
+      <view class="summary">
+        <view class="sum-row">
+          <text class="sum-k">时间</text>
+          <text class="sum-v">{{selectedDate}} · {{lectureSummary}}</text>
+        </view>
+        <view class="sum-row">
+          <text class="sum-k">教室</text>
+          <text class="sum-v">{{selectedClassroomInfo.buildingBelong}} {{selectedClassroomInfo.classroomID}}</text>
+        </view>
+        <view class="sum-row" wx:if="{{selectedClassroomInfo.roomType}}">
+          <text class="sum-k">类型</text>
+          <text class="sum-v">{{selectedClassroomInfo.roomType}}</text>
+        </view>
+        <view class="sum-row">
+          <text class="sum-k">容量</text>
+          <text class="sum-v">{{selectedClassroomInfo.containNumber}} 人（预计 {{capacity}} 人）</text>
+        </view>
+        <view class="sum-row" wx:if="{{selectedClassroomInfo.description}}">
+          <text class="sum-k">描述</text>
+          <text class="sum-v">{{selectedClassroomInfo.description}}</text>
+        </view>
+        <view class="sum-row" wx:if="{{selectedClassroomInfo.facilities && selectedClassroomInfo.facilities.length > 0}}">
+          <text class="sum-k">设施</text>
+          <text class="sum-v">{{selectedClassroomInfo.facilities}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="card">
+      <text class="card-title">申请信息</text>
+      <view class="f-item">
+        <text class="f-label required">使用事由</text>
+        <input class="f-input" placeholder="例如：班会、社团活动、学术讨论" value="{{rentalDetail}}" bindinput="onRentalDetailInput" maxlength="50" />
+      </view>
+      <view class="f-item">
+        <text class="f-label">补充说明</text>
+        <textarea class="f-textarea" placeholder="选填：其他需要说明的情况" value="{{rentalDescription}}" bindinput="onRentalDescriptionInput" maxlength="200" />
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 底部按钮 ==================== -->
+  <view class="foot">
+    <button class="btn-back" wx:if="{{currentStep > 0}}" bindtap="prevStep">上一步</button>
+
+    <button class="btn-go" wx:if="{{currentStep === 0}}" bindtap="nextStep" disabled="{{!canProceed}}">查找教室</button>
+
+    <button class="btn-go" wx:if="{{currentStep === 1}}" bindtap="nextStep" disabled="{{!canProceed}}">继续</button>
+
+    <button class="btn-submit" wx:if="{{currentStep === 2}}" bindtap="submitApplication" loading="{{submitting}}" disabled="{{!canProceed || submitting}}">提交申请</button>
+  </view>
+</view>

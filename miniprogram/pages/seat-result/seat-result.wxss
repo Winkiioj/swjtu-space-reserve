@@ -1,0 +1,15 @@
+@import '../seat/seat.wxss';
+
+/* 两行操作栏（返回按钮与标题对齐）微调 */
+.header-link {
+  font-size: 26rpx;
+  color: #07c160;
+  font-weight: 500;
+  padding: 8rpx 20rpx;
+  border: 2rpx solid #07c160;
+  border-radius: 30rpx;
+  white-space: nowrap;
+}
+.header-link:active {
+  background: #e8f8ee;
+}

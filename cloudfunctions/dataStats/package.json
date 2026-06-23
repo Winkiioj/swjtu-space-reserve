@@ -1,0 +1,9 @@
+{
+  "name": "dataStats",
+  "version": "1.0.0",
+  "description": "数据概况查询 — 一键查看各集合记录数、申请状态分布、用户统计等",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

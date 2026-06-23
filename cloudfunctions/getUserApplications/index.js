@@ -24,10 +24,10 @@ async function getClassroomInfo(classroomID) {
         const result = await db.collection('Classrooms')
             .doc(classroomID)
             .get()
-
-        if (result.data.length > 0) {
-            classroomCache[classroomID] = result.data[0]
-            return result.data[0]
+        // .doc() 返回单对象 {data: {...}}
+        if (result && result.data && result.data._id) {
+            classroomCache[classroomID] = result.data
+            return result.data
         }
     } catch (err) {
         console.error('获取教室信息失败:', err)
@@ -56,17 +56,17 @@ exports.main = async (event, context) => {
             }
         }
 
-        // ===== 构建查询条件 =====
-        let query = db.collection('Applications')
-            .where({ proposerID: userID })
+        // ===== 构建查询条件（合并为单次 where，避免链式覆盖）=====
+        const conditions = { proposerID: userID }
 
         // 如果指定了状态（不是-1），则按状态筛选
         if (status !== -1) {
-            query = query.where({ rentalStatus: status })
+            conditions.rentalStatus = status
         }
 
         // ===== 执行查询 =====
-        const result = await query
+        const result = await db.collection('Applications')
+            .where(conditions)
             .orderBy('appliedAt', 'desc')
             .skip(skip)
             .limit(limit)
@@ -80,11 +80,16 @@ exports.main = async (event, context) => {
             const classroom = await getClassroomInfo(app.classroomApplied)
 
             enrichedApplications.push({
+                ...app,  // 保留原始字段（classroomName, classroomBuilding 等）
                 _id: app._id,
                 applicationID: app._id,
                 classroomApplied: app.classroomApplied,
-                classroomID: classroom ? classroom.classroomID : 'N/A',
+                classroomID: classroom ? classroom.classroomID : (app.classroomName || 'N/A'),
+                classroomName: app.classroomName || (classroom ? classroom.classroomID : 'N/A'),
+                classroomBuilding: app.classroomBuilding || (classroom ? classroom.buildingBelong : 'N/A'),
                 buildingBelong: classroom ? classroom.buildingBelong : 'N/A',
+                building: classroom ? classroom.buildingBelong : 'N/A',
+                roomNumber: classroom ? classroom.classroomID : 'N/A',
                 proposerID: app.proposerID,
                 proposerName: app.proposerName,
                 rentalDetail: app.rentalDetail,

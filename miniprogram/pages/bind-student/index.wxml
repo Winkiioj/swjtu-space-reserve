@@ -1,0 +1,12 @@
+<view class="page">
+  <view class="card">
+    <text class="title">绑定学号/工号</text>
+    <text class="desc">请绑定您在学校系统中的学号或工号<br/>绑定后两种登录方式都能识别您的身份</text>
+
+    <input class="input" placeholder="请输入学号或工号" value="{{userID}}" bindinput="onInput" maxlength="20" focus />
+
+    <button class="btn" bindtap="onSubmit" loading="{{loading}}" disabled="{{loading}}">绑定并完成</button>
+  </view>
+
+  <text class="note">学号/工号需由管理员在系统中预先注册</text>
+</view>

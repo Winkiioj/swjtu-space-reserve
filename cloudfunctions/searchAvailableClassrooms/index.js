@@ -1,7 +1,7 @@
 /**
  * searchAvailableClassrooms - 查询可用教室
- * 
- * 根据日期、讲次、容量等条件查询可用教室
+ *
+ * 根据日期、讲次、容量、楼栋、教室类型、设施、楼层等条件查询可用教室
  * 查询逻辑：教室状态值为0表示空闲
  */
 
@@ -13,7 +13,14 @@ const _ = db.command
 
 exports.main = async (event, context) => {
     try {
-        const { rentDate, rentWeek, rentDayOfWeek, rentLectures, minCapacity = 0 } = event
+        const {
+            rentDate, rentWeek, rentDayOfWeek, rentLectures,
+            minCapacity = 0,
+            building,
+            roomType,       // 新增：教室类型精确筛选
+            facilities,     // 新增：设施多选筛选（数组）
+            floor           // 新增：楼层筛选
+        } = event
 
         // ===== 参数校验 =====
         if (!rentDate || !rentWeek || rentDayOfWeek === undefined || !rentLectures || rentLectures.length === 0) {
@@ -51,11 +58,32 @@ exports.main = async (event, context) => {
             }
         }
 
-        // ===== 查询所有符合容量的教室 =====
+        // ===== 构建查询条件 =====
+        let queryCondition = { containNumber: _.gte(minCapacity) }
+
+        // 楼栋筛选
+        if (building && building !== '') {
+            queryCondition.buildingBelong = building
+        }
+
+        // 教室类型筛选（精确匹配）
+        if (roomType && roomType !== '') {
+            queryCondition.roomType = roomType
+        }
+
+        // 楼层筛选（精确匹配）
+        if (floor !== undefined && floor !== null && floor !== '') {
+            queryCondition.floor = parseInt(floor)
+        }
+
+        // 设施筛选（教室必须同时包含所有选中的设施）
+        if (facilities && Array.isArray(facilities) && facilities.length > 0) {
+            queryCondition.facilities = _.all(facilities)
+        }
+
+        // ===== 查询符合条件的教室 =====
         const classrooms = await db.collection('Classrooms')
-            .where({
-                containNumber: _.gte(minCapacity)
-            })
+            .where(queryCondition)
             .get()
 
         if (classrooms.data.length === 0) {
@@ -88,8 +116,12 @@ exports.main = async (event, context) => {
                     _id: classroom._id,
                     classroomID: classroom.classroomID,
                     buildingBelong: classroom.buildingBelong,
+                    building: classroom.buildingBelong,
+                    roomNumber: classroom.classroomID,
                     floor: classroom.floor,
                     containNumber: classroom.containNumber,
+                    roomType: classroom.roomType || '',
+                    facilities: classroom.facilities || [],
                     description: classroom.description,
                     availability: rentLectures.map(l => matrix[rentDayOfWeek][l])
                 })

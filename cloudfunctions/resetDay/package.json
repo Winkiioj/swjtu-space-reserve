@@ -1,0 +1,9 @@
+{
+  "name": "resetDay",
+  "version": "1.0.0",
+  "description": "模拟新的一天 — 完结当日未处理申请、清理座位，可选删除旧数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

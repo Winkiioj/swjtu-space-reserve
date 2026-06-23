@@ -1,0 +1,10 @@
+{
+  "triggers": [
+    {
+      "name": "dailySeatProgress",
+      "type": "timer",
+      "config": "0 0 0 * * * *"
+    }
+  ],
+  "timeout": 120
+}

@@ -72,8 +72,8 @@
       "list": [
         {
           "id": -1,
-          "name": "db guide",
-          "pathName": "pages/databaseGuide/databaseGuide"
+          "name": "首页",
+          "pathName": "pages/index/index"
         }
       ]
     }
